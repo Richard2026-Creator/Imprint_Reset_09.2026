@@ -893,6 +893,8 @@ video[src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/Analytics_Portrai
 .btn-inv { display: inline-block; border: 1px solid rgba(245,242,236,0.25); color: var(--stone); padding: 0.9rem 2rem; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 400; text-decoration: none; transition: border-color 0.2s; border-radius: 999px; }
 .btn-inv:hover { border-color: var(--gold); }
 .pricing-note { text-align: center; margin-top: 2rem; font-size: 0.78rem; color: var(--mid); letter-spacing: 0.05em; }
+.pricing-cta-note { display: block; text-align: center; margin-top: 0.7rem; font-size: 0.72rem; letter-spacing: 0.04em; color: var(--mid); }
+.pricing-card.featured .pricing-cta-note { color: rgba(245,242,236,0.55); }
 
 /* ─── FAQ ─── */
 .faq { background: var(--stone); }
@@ -1369,7 +1371,8 @@ footer {
 .pricing-card h3 { font-size: 1.8rem; font-weight: 400; }
 .pricing-card .pricing-desc, .pricing-card.featured .pricing-desc, .pricing-card:not(.featured) .pricing-desc,
 .pricing-card .pricing-period, .pricing-card.featured .pricing-period,
-.pricing-card.featured .pricing-features li, .pricing-card:not(.featured) .pricing-features li { color: var(--cocoa-copy); }
+.pricing-card.featured .pricing-features li, .pricing-card:not(.featured) .pricing-features li,
+.pricing-card .pricing-cta-note, .pricing-card.featured .pricing-cta-note { color: var(--cocoa-copy); }
 .pricing-desc, .pricing-features li { font-size: .94rem; }
 .pricing-price, .pricing-card.featured .pricing-price { color: var(--linen); } .pricing-price + span { color: var(--cocoa-copy) !important; }
 .pricing .btn-ink, .pricing .btn-inv { background: transparent; border: 1px solid #ae9473; color: var(--linen); border-radius: 0; text-align: center; padding-inline: 12px; }
@@ -1880,6 +1883,7 @@ footer {
           <li>Single seat</li>
         </ul>
         <a href="https://buy.stripe.com/6oU5kD5Rk7VqaEBcgxeME0f" target="_blank" class="btn-ink">Start Free Trial</a>
+        <span class="pricing-cta-note">No card required</span>
       </div>
       <div class="pricing-card featured">
         <span class="pricing-tier">Studio</span>
@@ -1896,6 +1900,7 @@ footer {
           <li>Priority support</li>
         </ul>
         <a href="https://buy.stripe.com/6oUeVd0x01x26olfsJeME0g" target="_blank" class="btn-inv">Start Free Trial</a>
+        <span class="pricing-cta-note">No card required</span>
       </div>
       <div class="pricing-card">
         <span class="pricing-tier">Enterprise</span>
@@ -1913,7 +1918,7 @@ footer {
         <a href="#" class="btn-ink" onclick="openModal('enterprise'); return false;">Request Access</a>
       </div>
     </div>
-    <p class="pricing-note">One month free · Full access from day one · Cancel any time, keep your library</p>
+    <p class="pricing-note">One month free · No card required · Cancel any time, keep your library</p>
   </div>
 </section>
 
