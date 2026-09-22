@@ -1409,6 +1409,9 @@ footer {
 .faq-q { width: 100%; background: none; color: inherit; border: 0; text-align: left; }
 @media(max-width:760px) { .pricing-card h3,.pricing-card .pricing-desc { min-height: 0; } }
 </style>
+
+<!-- jsPDF: generates the demo's sample report client-side, no backend involved -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -1586,8 +1589,8 @@ footer {
           <div class="demo-mini-header"><img src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/IMPRINT%20Narrow.png" alt="IMPRINT" /></div>
           <div class="demo-confirm">
             <span class="demo-r-label" style="margin-bottom:0.6rem;">Session Complete</span>
-            <h3>This is where your branded PDF would land.</h3>
-            <p>Every client sees this moment, branded as your studio, addressed to them by name.</p>
+            <h3>Your sample report has downloaded.</h3>
+            <p>Check your downloads. A real client session arrives the same way, branded to your studio, in your dashboard.</p>
             <button class="demo-btn-secondary" id="demoRestartBtn" style="margin-top:1.4rem;">Try Again</button>
           </div>
         </div>
@@ -2053,6 +2056,7 @@ document.querySelectorAll('.cap-visual').forEach(el => capObserver.observe(el));
   let cardShownAt = 0;
   let locked = false;
   let started = false;
+  let lastResult = null;
 
   counterTotalEl.textContent = String(CARDS.length).padStart(2, '0');
 
@@ -2186,7 +2190,7 @@ document.querySelectorAll('.cap-visual').forEach(el => capObserver.observe(el));
     responseTimes.push(elapsed);
     const data = CARDS[idx];
     if (direction === 'like') { likes[data.style]++; totalLikes++; }
-    swipeHistory.push({ style: data.style, direction });
+    swipeHistory.push({ style: data.style, direction, src: data.src });
 
     if (cardEl) {
       const flyX = direction === 'like' ? 480 : -480;
@@ -2272,8 +2276,384 @@ document.querySelectorAll('.cap-visual').forEach(el => capObserver.observe(el));
       });
     }, 20);
 
+    const secondary = ranked.filter(s => s !== primary).slice(0, 2).map(s => STYLE_NAMES[s]);
+    lastResult = {
+      primary: primary ? STYLE_NAMES[primary] : 'Decisively selective',
+      decisiveness,
+      consistency,
+      consistencyNote: consistency >= 50 ? 'Concentrated aesthetic range' : 'Broad aesthetic range',
+      avgResponse: avg.toFixed(1) + 's avg response',
+      breakdown: ranked.map(s => ({ style: STYLE_NAMES[s], pct: pct[s] })),
+      secondary,
+      liked: swipeHistory.filter(h => h.direction === 'like').map(h => ({ ...h, styleName: STYLE_NAMES[h.style] })),
+      passed: swipeHistory.filter(h => h.direction === 'pass').map(h => ({ ...h, styleName: STYLE_NAMES[h.style] }))
+    };
+
     deckView.hidden = true;
     partialView.hidden = false;
+  }
+
+  // Fetches an image and re-encodes it as a small JPEG data URL via canvas.
+  // Drawing from a blob: URL (not the original cross-origin URL) means this
+  // never touches canvas/CORS tainting, and keeps the generated PDF a
+  // sane size instead of embedding multi-MB source photos verbatim.
+  function loadImageDataUrl(url, maxDim, bgColor, attempt) {
+    maxDim = maxDim || 640;
+    // JPEG has no alpha channel — an unfilled canvas defaults transparent
+    // pixels to black on flatten, so a dark logo on "transparent" silently
+    // becomes a dark logo on black. Fill with the target background first.
+    bgColor = bgColor || '#ffffff';
+    attempt = attempt || 1;
+    return fetch(url, { cache: 'no-store' })
+      .then(res => {
+        if (!res.ok) throw new Error('fetch failed: ' + res.status);
+        return res.blob();
+      })
+      .then(blob => new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+          const w = Math.round(img.naturalWidth * scale);
+          const h = Math.round(img.naturalHeight * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(objectUrl);
+          resolve(canvas.toDataURL('image/jpeg', 0.78));
+        };
+        img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('image decode failed')); };
+        img.src = objectUrl;
+      }))
+      // The R2 host is occasionally flaky (transient CORS/network hiccups),
+      // which would otherwise silently drop an embedded photo. Retry twice
+      // before giving up.
+      .catch(() => {
+        if (attempt < 3) {
+          return new Promise(r => setTimeout(r, 300)).then(() => loadImageDataUrl(url, maxDim, bgColor, attempt + 1));
+        }
+        return null;
+      });
+  }
+
+  // Draws an image "cover"-fit inside a box: crops to the box's aspect ratio
+  // (via an offscreen canvas) rather than letterboxing, so no fallback-black
+  // bars ever show around a photo of a different aspect ratio.
+  async function drawCoverImage(doc, dataUrl, boxX, boxY, boxW, boxH) {
+    if (!dataUrl) return false;
+    const img = await new Promise(resolve => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = () => resolve(null);
+      im.src = dataUrl;
+    });
+    if (!img) return false;
+    const boxAspect = boxW / boxH;
+    const imgAspect = img.naturalWidth / img.naturalHeight;
+    let sx, sy, sw, sh;
+    if (imgAspect > boxAspect) {
+      sh = img.naturalHeight;
+      sw = sh * boxAspect;
+      sx = (img.naturalWidth - sw) / 2;
+      sy = 0;
+    } else {
+      sw = img.naturalWidth;
+      sh = sw / boxAspect;
+      sx = 0;
+      sy = (img.naturalHeight - sh) / 2;
+    }
+    const outW = Math.round(boxW * 2), outH = Math.round(boxH * 2);
+    const canvas = document.createElement('canvas');
+    canvas.width = outW; canvas.height = outH;
+    canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+    doc.addImage(canvas.toDataURL('image/jpeg', 0.82), 'JPEG', boxX, boxY, boxW, boxH, undefined, 'FAST');
+    return true;
+  }
+
+  // Lays out photo boxes in a wrapping grid, adding pages as needed so any
+  // session count (0–12) renders in full rather than being capped.
+  async function drawPhotoGrid(doc, items, { cols, boxH, gap, marginX, startY, ink, ruleLt, mid, pageBackground, footer }) {
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const boxW = (pageW - marginX * 2 - gap * (cols - 1)) / cols;
+    let x = marginX, y = startY, col = 0;
+    for (const item of items) {
+      if (y + boxH + 34 > pageH - 60) {
+        if (footer) footer();
+        doc.addPage();
+        pageBackground();
+        y = 56; x = marginX; col = 0;
+      }
+      doc.setFillColor(...ink);
+      doc.rect(x, y, boxW, boxH, 'F');
+      await drawCoverImage(doc, item.dataUrl, x, y, boxW, boxH);
+      const capText = item.styleName.toUpperCase();
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      const capW = doc.getTextWidth(capText) + 20;
+      drawPill(doc, x + boxW / 2 - capW / 2, y + boxH + 10, capText, 7, 10, 18, ruleLt, mid);
+      col++;
+      if (col >= cols) { col = 0; x = marginX; y += boxH + 44; }
+      else { x += boxW + gap; }
+    }
+    if (col !== 0) y += boxH + 44;
+    return y;
+  }
+
+  // Rounded-cap progress bar: light track, filled proportionally to pct.
+  function drawBar(doc, x, y, w, h, pct, trackColor, fillColor) {
+    const r = h / 2;
+    doc.setFillColor(...trackColor);
+    doc.roundedRect(x, y, w, h, r, r, 'F');
+    const fillW = Math.max(h, w * Math.min(100, Math.max(0, pct)) / 100);
+    doc.setFillColor(...fillColor);
+    doc.roundedRect(x, y, fillW, h, r, r, 'F');
+  }
+
+  // Outlined pill containing centred uppercase text; returns the pill's width.
+  function drawPill(doc, x, y, text, fontSize, padX, h, borderColor, textColor) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(fontSize);
+    const textW = doc.getTextWidth(text);
+    const w = textW + padX * 2;
+    doc.setDrawColor(...borderColor);
+    doc.setLineWidth(0.75);
+    doc.roundedRect(x, y, w, h, h / 2, h / 2, 'S');
+    doc.setTextColor(...textColor);
+    doc.text(text, x + w / 2, y + h / 2 + fontSize * 0.34, { align: 'center' });
+    return w;
+  }
+
+  async function downloadReportPdf() {
+    if (!lastResult || !window.jspdf) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const gold = [182, 150, 108];
+    const ink = [14, 13, 11];
+    const mid = [92, 87, 80];
+    const soft = [140, 134, 128];
+    const paper = [245, 242, 237];
+    const ruleLt = [214, 211, 209];
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 40;
+
+    const emailInput = document.getElementById('demoEmailInput');
+    const localPart = (emailInput.value.trim().split('@')[0] || 'guest').replace(/[._-]+/g, ' ');
+    const displayName = localPart.charAt(0).toUpperCase() + localPart.slice(1).toLowerCase();
+    const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+    const decisivenessNote = lastResult.decisiveness >= 70 ? 'Highly instinctive choices' : lastResult.decisiveness >= 45 ? 'Considered, steady choices' : 'Exploratory, open-minded choices';
+    const narrative = `The session suggests a clear preference for ${lastResult.primary} interiors` +
+      (lastResult.secondary.length ? `, supported by ${lastResult.secondary.join(' and ')} influences.` : '.') +
+      ` Selections were made with ${lastResult.decisiveness >= 70 ? 'remarkable' : lastResult.decisiveness >= 45 ? 'steady' : 'evolving'} confidence and ${lastResult.consistency >= 50 ? 'a concentrated' : 'an evolving'} aesthetic range.`;
+
+    const logoData = await loadImageDataUrl('https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/IMPRINT%20Narrow.png', 640, '#f5f2ed');
+    const likedData = await Promise.all(lastResult.liked.map(h => loadImageDataUrl(h.src)));
+    const passedData = await Promise.all(lastResult.passed.map(h => loadImageDataUrl(h.src)));
+
+    function pageBackground() {
+      doc.setFillColor(...paper);
+      doc.rect(0, 0, pageW, pageH, 'F');
+    }
+    function footer(label) {
+      doc.setDrawColor(...gold);
+      doc.setLineWidth(0.75);
+      doc.line(marginX, pageH - 48, pageW - marginX, pageH - 48);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6);
+      doc.setTextColor(...soft);
+      doc.text(label, marginX, pageH - 34);
+      doc.text('DEMO SESSION · ILLUSTRATIVE, NOT A REAL CLIENT FILE', pageW - marginX, pageH - 34, { align: 'right' });
+    }
+
+    // ── PAGE 1 ──
+    pageBackground();
+    let y = 56;
+    if (logoData) doc.addImage(logoData, 'PNG', marginX, y - 20, 84, 22.6, undefined, 'FAST');
+    doc.setDrawColor(...gold);
+    doc.setLineWidth(0.85);
+    doc.line(marginX, y + 22, pageW - marginX, y + 22);
+    y += 48;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6);
+    doc.setTextColor(...soft);
+    doc.text('AESTHETIC INTELLIGENCE REPORT', marginX, y);
+    doc.text(today, pageW - marginX, y, { align: 'right' });
+    y += 22;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.text('PREPARED FOR', marginX, y);
+    y += 30;
+
+    doc.setFont('times', 'italic');
+    doc.setFontSize(30);
+    doc.setTextColor(...ink);
+    doc.text(displayName, marginX, y);
+    y += 34;
+
+    doc.setFont('times', 'italic');
+    doc.setFontSize(9);
+    doc.setTextColor(...soft);
+    doc.text('Your Aesthetic Profile', marginX, y);
+    y += 24;
+    doc.setFont('times', 'italic');
+    doc.setFontSize(18);
+    doc.setTextColor(...gold);
+    doc.text(lastResult.primary, marginX, y);
+    y += 26;
+
+    doc.setDrawColor(...gold);
+    doc.setLineWidth(1.1);
+    const ruleW = 170;
+    doc.line((pageW - ruleW) / 2, y, (pageW + ruleW) / 2, y);
+    y += 24;
+
+    doc.setFont('times', 'italic');
+    doc.setFontSize(12);
+    doc.setTextColor(...mid);
+    const quoteLines = doc.splitTextToSize('“' + narrative + '”', pageW - marginX * 2);
+    doc.text(quoteLines, marginX, y);
+    y += quoteLines.length * 15 + 26;
+
+    doc.setDrawColor(...ruleLt);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 32;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.setTextColor(...soft);
+    doc.text('INSTINCTIVE PROFILE', marginX, y);
+    y += 30;
+    const colW = (pageW - marginX * 2 - 24) / 2;
+    const col2X = marginX + colW + 24;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...mid);
+    doc.text('DECISIVENESS', marginX, y);
+    doc.text('CONSISTENCY', col2X, y);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...ink);
+    doc.text(lastResult.decisiveness + '%', marginX + colW, y, { align: 'right' });
+    doc.text(lastResult.consistency + '%', col2X + colW, y, { align: 'right' });
+    y += 10;
+    drawBar(doc, marginX, y, colW, 6, lastResult.decisiveness, ruleLt, gold);
+    drawBar(doc, col2X, y, colW, 6, lastResult.consistency, ruleLt, gold);
+    y += 20;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...mid);
+    doc.text(decisivenessNote, marginX, y);
+    doc.text(lastResult.consistencyNote, col2X, y);
+    y += 32;
+
+    doc.setDrawColor(...ruleLt);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 32;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.setTextColor(...soft);
+    doc.text('STYLE INFLUENCES', marginX, y);
+    y += 20;
+    (function drawInfluencePills() {
+      const pillH = 22, gap = 10, fontSize = 8, padX = 14;
+      let px = marginX, py = y;
+      lastResult.breakdown.forEach(row => {
+        const text = row.style.toUpperCase();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(fontSize);
+        const w = doc.getTextWidth(text) + padX * 2;
+        if (px + w > pageW - marginX) { px = marginX; py += pillH + gap; }
+        drawPill(doc, px, py, text, fontSize, padX, pillH, ruleLt, ink);
+        px += w + gap;
+      });
+      y = py + pillH;
+    })();
+    y += 28;
+
+    doc.setDrawColor(...ruleLt);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 32;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.setTextColor(...soft);
+    doc.text('STYLE WEIGHTING', marginX, y);
+    y += 24;
+    lastResult.breakdown.forEach(row => {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...ink);
+      doc.text(row.style.toUpperCase(), marginX, y);
+      y += 12;
+      drawBar(doc, marginX, y, pageW - marginX * 2 - 44, 7, row.pct, ruleLt, soft);
+      doc.setFontSize(9);
+      doc.setTextColor(...mid);
+      doc.text(row.pct + '%', pageW - marginX, y + 6, { align: 'right' });
+      y += 26;
+    });
+
+    footer(displayName.toUpperCase() + ' · CONFIDENTIAL');
+
+    // ── PAGE 2 ──
+    doc.addPage();
+    pageBackground();
+    y = 56;
+    if (logoData) doc.addImage(logoData, 'PNG', marginX, y - 20, 84, 22.6, undefined, 'FAST');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6);
+    doc.setTextColor(...soft);
+    doc.text('VISUAL SELECTIONS', pageW - marginX, y, { align: 'right' });
+    y += 18;
+    doc.setDrawColor(...gold);
+    doc.setLineWidth(0.85);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 30;
+
+    const likedItems = lastResult.liked.map((h, i) => ({ dataUrl: likedData[i], styleName: h.styleName }));
+    const passedItems = lastResult.passed.map((h, i) => ({ dataUrl: passedData[i], styleName: h.styleName }));
+    const gridOpts = { gap: 16, marginX, ink, ruleLt, mid, pageBackground, footer: () => footer(displayName.toUpperCase() + ' · CONFIDENTIAL') };
+
+    if (likedItems.length) {
+      y = await drawPhotoGrid(doc, likedItems, { ...gridOpts, cols: 3, boxH: 190, startY: y });
+    } else {
+      doc.setFont('times', 'italic');
+      doc.setFontSize(10);
+      doc.setTextColor(...mid);
+      doc.text('No selections recorded this session.', marginX, y + 20);
+      y += 50;
+    }
+
+    doc.setDrawColor(...ruleLt);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 32;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.setTextColor(...soft);
+    doc.text("WHAT DIDN'T RESONATE", marginX, y);
+    y += 24;
+
+    if (passedItems.length) {
+      y = await drawPhotoGrid(doc, passedItems, { ...gridOpts, cols: 4, boxH: 129, startY: y });
+    } else {
+      doc.setFont('times', 'italic');
+      doc.setFontSize(10);
+      doc.setTextColor(...mid);
+      doc.text('Nothing instinctively rejected this session.', marginX, y + 20);
+    }
+
+    footer(displayName.toUpperCase() + ' · CONFIDENTIAL');
+
+    doc.save('IMPRINT-Sample-Report.pdf');
   }
 
   document.getElementById('demoUnlockBtn').addEventListener('click', () => {
@@ -2281,8 +2661,24 @@ document.querySelectorAll('.cap-visual').forEach(el => capObserver.observe(el));
     emailView.hidden = false;
   });
 
-  document.getElementById('demoEmailForm').addEventListener('submit', (e) => {
+  document.getElementById('demoEmailForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const input = document.getElementById('demoEmailInput');
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+    if (!valid) { input.reportValidity(); return; }
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalLabel = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Generating…';
+    fetch('https://script.google.com/macros/s/AKfycbwcycP1x9G2-xrzpM8U63nDOz4OalG8kfZy0i_RQIkUk7JvD5IiiMPpkMxlLZAd-Gzj/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: input.value.trim() })
+    }).catch(() => {});
+    await downloadReportPdf();
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalLabel;
     emailView.hidden = true;
     confirmView.hidden = false;
   });
