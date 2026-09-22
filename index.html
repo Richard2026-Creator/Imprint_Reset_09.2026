@@ -819,6 +819,14 @@ video[src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/Analytics_Portrai
   width: 100%; height: 100%; object-fit: cover;
   z-index: 0;
 }
+/* Screen-recording videos carry their own full composition (device mockups
+   reaching close to every edge) — cropping via cover eats into that content
+   whenever the box's aspect ratio (fixed height, fluid width) drifts from the
+   video's 16:9. Contain-fit instead, so the box's own ink background reads as
+   intentional letterboxing rather than losing part of the mockup. */
+.cap-visual .cap-visual-fill.contain-fit {
+  object-fit: contain;
+}
 .cap-visual .cap-visual-photo {
   filter: grayscale(30%) brightness(0.5);
 }
@@ -1840,8 +1848,8 @@ footer {
       </div>
     </div>
     <div class="cap-visual" style="padding:0;">
-      <video class="cap-visual-fill video-reveal-desktop" src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/Anaytics_Slow_4k.mp4" autoplay muted loop playsinline></video>
-      <video class="cap-visual-fill video-reveal-mobile" src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/Analytics_Portrait.mp4" autoplay muted loop playsinline></video>
+      <video class="cap-visual-fill contain-fit video-reveal-desktop" src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/Anaytics_Slow_4k.mp4" autoplay muted loop playsinline></video>
+      <video class="cap-visual-fill contain-fit video-reveal-mobile" src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/Analytics_Portrait.mp4" autoplay muted loop playsinline></video>
     </div>
   </div>
 </section>
