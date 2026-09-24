@@ -1419,6 +1419,65 @@ footer {
 .pricing-card .pricing-period { color: var(--cocoa-copy); }
 .faq-q { width: 100%; background: none; color: inherit; border: 0; text-align: left; }
 @media(max-width:760px) { .pricing-card h3,.pricing-card .pricing-desc { min-height: 0; } }
+
+/* ─── MOBILE EDIT: shorter page, fewer stacked text blocks. Desktop untouched. ─── */
+.m-only { display: none; }
+@media (max-width: 760px) {
+  .d-only { display: none !important; }
+  p.m-only { display: block; }
+  .cap-text p.m-only { margin-bottom: 0; }
+
+  /* Hero: plain body line, square button to match the rest of the site, direct trial link */
+  .hero-h2 { font-style: normal !important; font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: 0.98rem !important; line-height: 1.7 !important; margin-bottom: 2.2rem !important; }
+  .hero .btn-gold { border-radius: 0; }
+  .hero-trial-link.m-only {
+    display: inline-block; margin-top: 0.4rem; padding-bottom: 3px;
+    font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--stone); opacity: 0.8; text-decoration: none; border-bottom: 1px solid var(--gold);
+  }
+
+  /* The Alternative: one grey line, not two, and no dead space underneath */
+  .problem-visual { padding-bottom: 0; }
+  .problem-visual-inner { padding-bottom: 2.5rem; }
+  .problem-visual-footnote { margin-top: 1.8rem; }
+
+  /* Report: one label, one caption, less dead space underneath */
+  .intel-profile-label { display: none; }
+  .intel-profile-wrap { padding-bottom: 8px; }
+
+  /* How it works: the section header already introduces the video */
+  .steps-video-label { display: none; }
+
+  /* Capabilities: tighter text blocks, compact partner card, shorter dashboard visual */
+  .cap-text, .cap-block.flip .cap-text { padding: 40px 24px 36px; }
+  .intel-couple-h3,
+  .intel-couple-col .intel-couple-styles-plain,
+  .intel-couple-note { display: none; }
+  .cap-block:not(.cap-block--wide) .cap-visual { aspect-ratio: 4 / 3; }
+  .cap-block.flip:last-child .cap-visual { aspect-ratio: 5 / 4; }
+  .cap-block.flip:last-child .cap-visual .cap-visual-fill.contain-fit { object-fit: cover; }
+
+  /* Pricing: price first, no card headlines, compact Enterprise */
+  .pricing .section-header p { display: none; }
+  .pricing-card { position: relative; }
+  .pricing-card h3 { display: none; }
+  .pricing-card .price-row, .pricing-card > .pricing-price { order: 1; margin-top: 0.6rem; }
+  .pricing-card .price-sub { order: 2; margin-bottom: 1rem !important; }
+  .pricing-card .pricing-desc { order: 3; margin-bottom: 1.4rem; }
+  .pricing-card .pricing-features { order: 4; }
+  .pricing-card > .btn-ink, .pricing-card > .btn-inv { order: 5; }
+  .pricing-card .pricing-cta-note { order: 6; }
+  .pricing-card:last-child .pricing-features,
+  .pricing-card:last-child .pricing-period { display: none; }
+  .pricing-badge.m-only {
+    display: inline-block; position: absolute; top: 36px; right: 24px;
+    font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold-lt); border: 1px solid var(--gold-lt); padding: 4px 10px;
+  }
+
+  /* Footer: light logo on the dark footer */
+  .footer-logo-img { filter: invert(1) hue-rotate(180deg); }
+}
 </style>
 
 <!-- jsPDF: generates the demo's sample report client-side, no backend involved -->
@@ -1480,9 +1539,10 @@ footer {
     <div class="hero-content">
       <span class="hero-eyebrow">For Interior Design Studios</span>
       <h1>Your client swipes<br class="mobile-br"> for seven minutes.<br><em>You get their aesthetic DNA before you meet.</em></h1>
-      <p class="hero-h2">Vague briefs cost you revisions. IMPRINT™ turns instinct into a branded report before the first conversation.</p>
+      <p class="hero-h2"><span class="d-only">Vague briefs cost you revisions. </span>IMPRINT™ turns instinct into a branded report before the first conversation.</p>
       <div class="hero-actions">
         <a href="#demo" class="btn-gold">Try The Demo</a>
+        <a href="https://app.useimprint.design/#/?signup" target="_blank" class="hero-trial-link m-only">Start free trial · No card required</a>
       </div>
     </div>
     <div class="hero-right"></div>
@@ -1513,7 +1573,7 @@ footer {
     <span class="label">The Alternative</span>
     <h2 class="problem-visual-h2">Your creativity isn't the risk.<br>The <em>brief</em> is.</h2>
     <div class="problem-visual-lines">
-      <p>Every revision costs margin you'll never see again.</p>
+      <p class="d-only">Every revision costs margin you'll never see again.</p>
       <p>Pinterest finds the mood. It was never built to find the meaning.</p>
       <p class="problem-visual-line--gold">IMPRINT™ shows you what it means, scored, weighted, and mapped, before you meet.</p>
     </div>
@@ -1700,7 +1760,7 @@ footer {
         </div>
 
       </div>
-      <p style="text-align:center;font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(245,242,236,0.55);margin-top:2rem;">Sample report — illustrative example, not a real client.</p>
+      <p class="d-only" style="text-align:center;font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(245,242,236,0.55);margin-top:2rem;">Sample report — illustrative example, not a real client.</p>
       <p style="text-align:center;font-size:1rem;color:rgba(245,242,236,0.6);max-width:480px;margin:2rem auto 0;font-style:italic;font-family:'Cormorant Garamond',serif;">Reviewed by our first cohort of studios.</p>
     </div>
   </div>
@@ -1777,7 +1837,8 @@ footer {
       <div class="container" style="padding-left:0;padding-right:0;">
         <div class="cap-num">01</div>
         <h2>A discovery session so good, clients <em>look forward</em> to it.</h2>
-        <p>IMPRINT™ sends each client a <strong>personalised link</strong>, branded with your studio, addressed to them by name, filtered to their room type. No login. No friction. A few minutes. Done.</p>
+        <p class="m-only">A <strong>personalised link</strong>, branded with your studio and addressed to each client by name. No login. No friction.</p>
+        <p class="d-only">IMPRINT™ sends each client a <strong>personalised link</strong>, branded with your studio, addressed to them by name, filtered to their room type. No login. No friction. A few minutes. Done.</p>
       </div>
     </div>
     <div class="cap-visual" style="padding:0;">
@@ -1791,7 +1852,8 @@ footer {
       <div class="container" style="padding-left:0;padding-right:0;">
         <div class="cap-num">02</div>
         <h2>They share a home. They don't share a taste.</h2>
-        <p>Run both partners through discovery separately. IMPRINT™ shows where their instincts align, where they pull in opposite directions, and the design language that holds both. Walk into that meeting already holding the answer.</p>
+        <p class="m-only">Both partners swipe separately. IMPRINT™ shows where they align, where they pull apart, and the language that holds both.</p>
+        <p class="d-only">Run both partners through discovery separately. IMPRINT™ shows where their instincts align, where they pull in opposite directions, and the design language that holds both. Walk into that meeting already holding the answer.</p>
       </div>
     </div>
     <div class="cap-visual">
@@ -1833,7 +1895,8 @@ footer {
       <div class="container" style="padding-left:0;padding-right:0;">
         <div class="cap-num">03</div>
         <h2>The images they discarded tell you more than the ones they chose.</h2>
-        <p>Every instinctive no is a signal. IMPRINT™ maps what this client will never respond to, the tones and styles that would cost you a revision and a strained relationship if you got them wrong. Knowing what to avoid is half the brief.</p>
+        <p class="m-only">Every instinctive no is a signal. Knowing what to avoid is half the brief.</p>
+        <p class="d-only">Every instinctive no is a signal. IMPRINT™ maps what this client will never respond to, the tones and styles that would cost you a revision and a strained relationship if you got them wrong. Knowing what to avoid is half the brief.</p>
       </div>
     </div>
     <div class="cap-visual" style="padding:0;">
@@ -1847,7 +1910,8 @@ footer {
       <div class="container" style="padding-left:0;padding-right:0;">
         <div class="cap-num">04</div>
         <h2>Every session adds to a dashboard that gets sharper over time.</h2>
-        <p>Track which styles dominate, which images perform, and how taste is shifting across your whole client base. Six months in, you're not just reading one client. You're reading your market.</p>
+        <p class="m-only">See which styles dominate and how taste shifts across your clients. Six months in, you're reading your market.</p>
+        <p class="d-only">Track which styles dominate, which images perform, and how taste is shifting across your whole client base. Six months in, you're not just reading one client. You're reading your market.</p>
       </div>
     </div>
     <div class="cap-visual" style="padding:0;">
@@ -1862,7 +1926,7 @@ footer {
   <div class="container">
     <div class="section-header">
       <span class="label">Simple Pricing</span>
-      <h2>Start free. Cancel any time.<br>Or don't, and change how you win.</h2>
+      <h2>Start free. Cancel any time.<span class="d-only"><br>Or don't, and change how you win.</span></h2>
       <p>One month free, full access, no feature gates. Run one real client session before the trial ends. That's the moment that matters, not the calendar.</p>
     </div>
     <div class="pricing-grid reveal-stagger">
@@ -1870,11 +1934,11 @@ footer {
         <span class="pricing-tier">Essential</span>
         <h3>Everything you need to read your client before you meet them.</h3>
         <p class="pricing-desc">Unlimited discovery sessions. Your image library. Your brand on every touchpoint. Analytics included.</p>
-        <div style="display:flex; align-items:baseline; gap:0.6rem; margin-bottom:0.8rem;">
+        <div class="price-row" style="display:flex; align-items:baseline; gap:0.6rem; margin-bottom:0.8rem;">
           <span class="pricing-price">£9.99</span>
           <span style="font-family:'Montserrat',sans-serif; font-size:0.78rem; font-weight:300; letter-spacing:0.05em; color:var(--mid);">per month</span>
         </div>
-        <p style="font-family:'Montserrat',sans-serif; font-size:0.78rem; font-weight:300; line-height:1.8; color:var(--mid); margin-bottom:1.6rem;">One month free, then £9.99 a month.</p>
+        <p class="price-sub" style="font-family:'Montserrat',sans-serif; font-size:0.78rem; font-weight:300; line-height:1.8; color:var(--mid); margin-bottom:1.6rem;">One month free, then £9.99 a month.</p>
         <ul class="pricing-features">
           <li>Unlimited custom swipe decks</li>
           <li>Unlimited client discoveries</li>
@@ -1887,13 +1951,14 @@ footer {
       </div>
       <div class="pricing-card featured">
         <span class="pricing-tier">Studio</span>
+        <span class="pricing-badge m-only">Best value</span>
         <h3>The same intelligence, two months on us.</h3>
         <p class="pricing-desc">More insights. Lower cost.</p>
-        <div style="display:flex; align-items:baseline; gap:0.6rem; margin-bottom:0.8rem;">
+        <div class="price-row" style="display:flex; align-items:baseline; gap:0.6rem; margin-bottom:0.8rem;">
           <span class="pricing-price">£99</span>
           <span style="font-family:'Montserrat',sans-serif; font-size:0.78rem; font-weight:300; letter-spacing:0.05em; color:rgba(245,242,236,0.55);">per year</span>
         </div>
-        <p style="font-family:'Montserrat',sans-serif; font-size:0.78rem; font-weight:300; line-height:1.8; color:rgba(245,242,236,0.55); margin-bottom:1.6rem;">One month free, then £99 a year.</p>
+        <p class="price-sub" style="font-family:'Montserrat',sans-serif; font-size:0.78rem; font-weight:300; line-height:1.8; color:rgba(245,242,236,0.55); margin-bottom:1.6rem;">One month free, then £99 a year.</p>
         <ul class="pricing-features">
           <li>Everything in Essential</li>
           <li>Over two months free vs. monthly</li>
@@ -1983,7 +2048,7 @@ footer {
 
 <!-- FOOTER -->
 <footer>
-  <img src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/IMPRINT%20Narrow.png" alt="IMPRINT" style="height:34px;width:auto;display:block;" />
+  <img class="footer-logo-img" src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/IMPRINT%20Narrow.png" alt="IMPRINT" style="height:34px;width:auto;display:block;" />
   <div class="footer-links">
     <a href="/connect.html">IMPRINT Connect</a>
     <a href="https://calendly.com/richard-creativise/meeting-with-richard" target="_blank" rel="noopener noreferrer">Book a Demo</a>
