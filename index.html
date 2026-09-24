@@ -1420,6 +1420,9 @@ footer {
 .faq-q { width: 100%; background: none; color: inherit; border: 0; text-align: left; }
 @media(max-width:760px) { .pricing-card h3,.pricing-card .pricing-desc { min-height: 0; } }
 
+/* Footer: light logo on the dark footer, same treatment as the nav logo over the hero */
+.footer-logo-img { filter: invert(1) hue-rotate(180deg); }
+
 /* ─── MOBILE EDIT: shorter page, fewer stacked text blocks. Desktop untouched. ─── */
 .m-only { display: none; }
 @media (max-width: 760px) {
@@ -1474,9 +1477,6 @@ footer {
     font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--gold-lt); border: 1px solid var(--gold-lt); padding: 4px 10px;
   }
-
-  /* Footer: light logo on the dark footer */
-  .footer-logo-img { filter: invert(1) hue-rotate(180deg); }
 }
 </style>
 
@@ -2014,15 +2014,9 @@ footer {
         </div>
       </div>
       <div class="faq-item">
-        <button type="button" class="faq-q" aria-expanded="false">What happens when my trial has ended?</button>
+        <button type="button" class="faq-q" aria-expanded="false">What happens when my trial ends, or if I cancel?</button>
         <div class="faq-a">
-          <p>After your free month, subscribe and it's all there. Nothing is deleted.</p>
-        </div>
-      </div>
-      <div class="faq-item">
-        <button type="button" class="faq-q" aria-expanded="false">What happens to my data if I cancel?</button>
-        <div class="faq-a">
-          <p>Nothing is deleted. Subscribe again and it's all there.</p>
+          <p>Nothing is deleted. Subscribe and it's all there.</p>
         </div>
       </div>
       <div class="faq-item">
