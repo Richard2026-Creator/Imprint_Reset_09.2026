@@ -114,10 +114,12 @@
   /* Intro + finale overlays */
   .overlay {
     position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; text-align: center; padding: 24px;
-    background: rgba(245,242,236,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    background: rgba(245,242,236,.82); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     opacity: 0; pointer-events: none; transition: opacity .5s var(--ease);
   }
   .overlay.on { opacity: 1; pointer-events: auto; }
+  /* behind the intro and finale, the screenshot is only a soft texture, so dark UI doesn't smudge through */
+  .tour.intro .shot .layer.on, .tour.finale .shot .layer.on { opacity: .4; }
   .overlay .inner { max-width: 520px; }
   .overlay h2 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(28px, 4.2vw, 52px); line-height: 1.05; margin: 12px 0 14px; }
   .overlay h2 em { color: var(--gold-deep); }
