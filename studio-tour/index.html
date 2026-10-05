@@ -193,6 +193,104 @@
     .guide h3 { font-size: 23px; }
     .thread { display: none; }
   }
+  /* ---------- Phones: tap through the real mobile Studio inside a phone ---------- */
+  .ptour { display: none; }
+  @media (max-width: 720px) {
+    .tour > :not(.ptour) { display: none !important; }
+    .ptour { display: block; }
+  }
+  .ptour { --pw: 300px; text-align: center; }
+  .pt-cap { min-height: 104px; max-width: 340px; margin: 0 auto 16px; }
+  .pt-cap .meta { display: flex; justify-content: center; gap: 10px; align-items: baseline; }
+  .pt-cap .meta span { font-size: 11px; letter-spacing: .16em; color: var(--soft); font-variant-numeric: tabular-nums; }
+  .pt-cap h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 25px; line-height: 1.12; margin: 6px 0 4px; }
+  .pt-cap p { color: var(--mid); font-size: 14.5px; line-height: 1.5; }
+  .pt-cap > * { transition: opacity .25s var(--ease), transform .35s var(--ease); }
+  .pt-cap.swap > * { opacity: 0; transform: translateY(4px); }
+
+  /* The phone: titanium rim, black bezel, side buttons, status bar with Dynamic Island, home indicator */
+  .pt-phone {
+    position: relative; width: var(--pw); margin: 0 auto; padding: 3px; border-radius: calc(var(--pw) * .165);
+    background: linear-gradient(150deg, #e4dfd6 0%, #9d978e 28%, #d3cdc3 52%, #8a847b 78%, #c8c2b8 100%);
+    box-shadow: 0 40px 70px -28px rgba(0,0,0,.75), 0 12px 24px -12px rgba(0,0,0,.4);
+  }
+  .pt-phone::before, .pt-phone::after { content: ""; position: absolute; width: 3px; border-radius: 2px; background: #a9a399; }
+  .pt-phone::before { left: -3px; top: 21%; height: 7%; box-shadow: 0 calc(var(--pw) * .2) 0 #a9a399; }   /* volume up / down */
+  .pt-phone::after { right: -3px; top: 27%; height: 11%; }                                                   /* side button */
+  .pt-bezel { padding: calc(var(--pw) * .028); border-radius: calc(var(--pw) * .155); background: #0d0d0c; }
+  .pt-screen {
+    position: relative; overflow: hidden; aspect-ratio: 900 / 1951; border-radius: calc(var(--pw) * .13);
+    background: var(--paper); touch-action: pan-y;
+  }
+  .pt-status {
+    position: absolute; left: 0; right: 0; top: 0; height: 6.36%; z-index: 2; background: #fbfaf7;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 9% 0 11%;
+    font: 600 calc(var(--pw) * .045) / 1 -apple-system, 'SF Pro Text', 'DM Sans', sans-serif; color: #111;
+  }
+  .pt-status .island { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); width: 31%; height: 62%; border-radius: 999px; background: #0d0d0c; }
+  .pt-status .icons { display: flex; align-items: center; gap: calc(var(--pw) * .016); }
+  .pt-status svg { display: block; height: calc(var(--pw) * .038); width: auto; }
+  .pt-view { position: absolute; left: 0; right: 0; top: 6.36%; bottom: 0; }
+  .pt-home { position: absolute; left: 50%; bottom: 1.1%; transform: translateX(-50%); width: 35%; height: 4px; border-radius: 4px; background: rgba(14,13,11,.75); z-index: 2; pointer-events: none; }
+  .pt-screen .layer { position: absolute; inset: 0; opacity: 0; transition: opacity .45s var(--ease), transform .55s var(--ease); }
+  .pt-screen .layer img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+  .pt-screen .layer.on { opacity: 1; transform: none; }
+  .pt-screen .layer.from-below { transform: translateY(14%); }
+  .pt-screen .layer.to-above { transform: translateY(-10%); }
+
+  /* Tap target: pulsing gold ring with its action beside it */
+  .pt-hot { position: absolute; width: 0; height: 0; z-index: 2; opacity: 0; pointer-events: none; transition: opacity .3s var(--ease) .3s; }
+  .pt-hot.on { opacity: 1; pointer-events: auto; }
+  .pt-hot .ring {
+    position: absolute; left: -20px; top: -20px; width: 40px; height: 40px; border-radius: 50%;
+    border: 2px solid var(--gold); background: rgba(184,154,104,.22); display: grid; place-items: center;
+  }
+  .pt-hot .ring::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px #fff; }
+  .pt-hot .ring::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--gold); animation: pulse 1.8s var(--ease) infinite; }
+  .pt-hot .label {
+    position: absolute; top: 26px; left: 50%; transform: translateX(-50%); white-space: nowrap; pointer-events: none;
+    display: flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 999px; font-size: 12px; letter-spacing: .06em;
+    background: var(--gold); color: var(--ink); box-shadow: 0 8px 20px -8px rgba(14,13,11,.5);
+  }
+  .pt-hot.up .label { top: auto; bottom: 26px; }
+  .pt-hot.left .label { left: auto; right: -12px; transform: none; }
+  .pt-hot.right .label { left: -12px; transform: none; }
+  /* Steps without a button to tap (scrolling, or moving on) get a pill at the bottom of the screen */
+  .pt-hot.pill .ring { display: none; }
+  .pt-hot.pill .label { top: auto; bottom: 0; left: 50%; transform: translateX(-50%); pointer-events: auto; cursor: pointer; }
+  .pt-hot.scroll .label { animation: nudge 1.6s var(--ease) infinite; }
+  @keyframes nudge { 0%, 100% { margin-bottom: 0; } 50% { margin-bottom: 5px; } }
+
+  /* End of the tour, over the last screen */
+  .pt-end {
+    position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; padding: 22px; text-align: center;
+    background: rgba(245,242,236,.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    opacity: 0; pointer-events: none; transition: opacity .45s var(--ease);
+  }
+  .pt-end.on { opacity: 1; pointer-events: auto; }
+  .pt-end h3 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 21px; line-height: 1.15; margin: 0 0 16px; }
+  .pt-end h3 em { color: var(--gold-deep); }
+  .pt-end .btn { width: 100%; justify-content: center; padding: 13px 16px; font-size: 11px; letter-spacing: .16em; }
+  .pt-end .text-link {
+    display: inline-block; margin-top: 14px; font-size: 12.5px; color: var(--ink); text-decoration: none;
+    border-bottom: 1px solid var(--gold); padding-bottom: 2px;
+  }
+  .pt-end .linkish { display: block; margin: 16px auto 0; font-size: 10.5px; }
+
+  .pt-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; }
+  .pt-nav button { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 1px solid var(--warmer); transition: opacity .2s; }
+  .pt-nav button:disabled { opacity: .3; cursor: default; }
+  .pt-dots { display: flex; gap: 5px; }
+  .pt-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--warmer); transition: background .3s, transform .3s; }
+  .pt-dots i.done { background: var(--gold-lt); }
+  .pt-dots i.on { background: var(--gold); transform: scale(1.5); }
+  html.dark .pt-cap h3 { color: var(--stone); }
+  html.dark .pt-cap p { color: rgba(245,242,236,.65); }
+  html.dark .pt-cap .eyebrow { color: var(--gold-lt); }
+  html.dark .pt-cap .meta span { color: rgba(245,242,236,.45); }
+  html.dark .pt-nav button { background: transparent; border-color: rgba(245,242,236,.22); color: var(--stone); }
+  html.dark .pt-dots i { background: rgba(245,242,236,.18); }
+
   /* ---------- Embedded mode ---------- */
   html.embed, html.embed body { background: transparent; }
   html.embed body { padding: 2px 2px 34px; }
@@ -213,6 +311,44 @@
 </head>
 <body>
 <main class="tour intro" id="tour">
+  <!-- Phones: tap through the real mobile Studio -->
+  <section class="ptour" aria-label="IMPRINT Studio tour">
+    <div class="pt-cap" id="ptCap" aria-live="polite">
+      <div class="meta"><b class="eyebrow" id="ptCh"></b><span id="ptNum"></span></div>
+      <h3 id="ptTitle"></h3>
+      <p id="ptBody"></p>
+    </div>
+    <div class="pt-phone"><div class="pt-bezel">
+      <div class="pt-screen" id="ptScreen">
+        <div class="pt-status" aria-hidden="true">
+          <span>9:41</span><i class="island"></i>
+          <span class="icons">
+            <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>
+            <svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0zM3.4 6.8a6.5 6.5 0 0 1 9.2 0l-1.5 1.5a4.4 4.4 0 0 0-6.2 0zM1 4.4a9.9 9.9 0 0 1 14 0l-1.5 1.5a7.8 7.8 0 0 0-11 0z" fill="currentColor"/></svg>
+            <svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="23" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><path d="M25 4v4c.8-.3 1.3-1.1 1.3-2S25.8 4.3 25 4z" fill="currentColor" opacity=".4"/></svg>
+          </span>
+        </div>
+        <div class="pt-view">
+          <div class="pt-hot" id="ptHot"><button class="ring" id="ptRing" aria-label="Continue"></button><span class="label" id="ptLabel"></span></div>
+        </div>
+        <i class="pt-home"></i>
+        <div class="pt-end" id="ptEnd">
+          <div>
+            <h3>Your studio's taste, <em>made measurable.</em></h3>
+            <a class="btn btn-ink" href="/#pricing" target="_top">Start free trial</a>
+            <a class="text-link" href="sample-partner-report.pdf" target="_blank" rel="noopener">See a sample partner report &rarr;</a>
+            <button class="linkish" id="ptReplay">Replay the tour</button>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="pt-nav">
+      <button id="ptPrev" aria-label="Previous step"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+      <div class="pt-dots" id="ptDots"></div>
+      <button id="ptNext" aria-label="Next step"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+  </section>
+
   <header class="tour-head">
     <div>
       <div class="eyebrow">Interactive walkthrough</div>
@@ -286,7 +422,7 @@
 <script>
 /* Each step: screenshot, size, chapter, copy, optional spotlight `focus` [x, y, w, h]
    and `hot` click target [x, y] — all as percentages of the screenshot.
-   Phones zoom into `mFocus` (or `focus`); `mImg`/`mw`/`mh`/`mHot` swap in a real mobile screenshot. */
+   Phones get their own tour (PHONE_STEPS below) built from real mobile screenshots. */
 const STEPS = [
   { img: '01', w: 2400, h: 1142, ch: 'Dashboard', url: 'app.useimprint.design/studio',
     title: 'Your studio, at a glance',
@@ -303,7 +439,7 @@ const STEPS = [
   { img: '04', w: 2400, h: 1150, ch: 'Library', url: 'app.useimprint.design/studio/library',
     title: 'Filter, tag and organise',
     body: 'Filter by room or style and batch-tag images in seconds. Tags are what power the intelligence behind every client profile.',
-    focus: [35.7, 28.5, 41.1, 71.5], mFocus: [35.7, 20, 41.1, 60], hot: [74.4, 23.5], tip: 'Next: Tags' },
+    focus: [35.7, 28.5, 41.1, 71.5], hot: [74.4, 23.5], tip: 'Next: Tags' },
   { img: '05', w: 2400, h: 1108, ch: 'Tags', url: 'app.useimprint.design/studio/tags',
     title: 'Define your aesthetic language',
     body: 'Create the style categories that matter to your studio — from Japandi to Luxury Glamour. IMPRINT maps every client choice against them.',
@@ -319,7 +455,7 @@ const STEPS = [
   { img: '08', w: 2400, h: 1135, ch: 'Client Links', url: 'app.useimprint.design/studio/links',
     title: 'Scope it to a room — or don’t',
     body: 'Focus the session on a single room, or leave it open to your full library. Then generate the link.',
-    focus: [38, 41.4, 37.4, 9.4], mFocus: [38, 40, 37.4, 18], hot: [71.5, 55], tip: 'Generate link' },
+    focus: [38, 41.4, 37.4, 9.4], hot: [71.5, 55], tip: 'Generate link' },
   { img: '09', w: 2400, h: 1132, ch: 'Client Links', url: 'app.useimprint.design/studio/links',
     title: 'Send it in one click',
     body: 'Copy the personalised link and share it however you like — email, WhatsApp, or straight after a consultation.',
@@ -327,8 +463,7 @@ const STEPS = [
   { img: '10', w: 2400, h: 1127, ch: 'Client View', url: 'app.useimprint.design/?client=Natasha%20Church',
     title: 'What your client sees',
     body: 'A calm, branded welcome made just for them. They begin a short, instinctive visual session — no forms, no jargon.',
-    hot: [56.6, 66.9], tip: 'Begin discovery',
-    mImg: '10m', mw: 567, mh: 1256, mHot: [80, 67] },
+    hot: [56.6, 66.9], tip: 'Begin discovery' },
   { img: '11', w: 2400, h: 1141, ch: 'Analytics', url: 'app.useimprint.design/studio/analytics',
     title: 'Studio intelligence',
     body: 'Every session in one place: total sessions, average decisiveness and the styles trending across your clients. Export to CSV at any time.',
@@ -336,11 +471,11 @@ const STEPS = [
   { img: '12', w: 2400, h: 1121, ch: 'Analytics', url: 'app.useimprint.design/studio/analytics',
     title: 'Every client, decoded',
     body: 'Dominant styles, decisiveness and the images they actually chose — at a glance. Open the full report or download a polished PDF.',
-    focus: [1, 7.6, 97.4, 10.5], mFocus: [55, 4, 44, 17], hot: [84.8, 12.85], tip: 'View report' },
+    focus: [1, 7.6, 97.4, 10.5], hot: [84.8, 12.85], tip: 'View report' },
   { img: '13', w: 2400, h: 1258, ch: 'Reports', url: 'app.useimprint.design/report/natasha-church',
     title: 'The Aesthetic Intelligence Report',
     body: 'A written narrative of your client’s taste, with decisiveness, consistency and a weighting across every style in your library.',
-    focus: [3.3, 50.6, 93.2, 47.8], mFocus: [2, 48, 50, 48], hot: [7.6, 87.2], tip: 'See their selections' },
+    focus: [3.3, 50.6, 93.2, 47.8], hot: [7.6, 87.2], tip: 'See their selections' },
   { img: '14', w: 2400, h: 1273, ch: 'Reports', url: 'app.useimprint.design/report/natasha-church',
     title: 'What they chose — and what didn’t land',
     body: 'See the exact images your client chose, plus the styles they consistently moved away from. Invaluable before the first design meeting.',
@@ -348,11 +483,11 @@ const STEPS = [
   { img: '16', w: 2400, h: 1137, ch: 'Partner Compare', url: 'app.useimprint.design/studio/analytics',
     title: 'Designing for a couple?',
     body: 'Tick any two client rows to compare their aesthetic profiles side by side.',
-    focus: [1.4, 74.9, 97.1, 19.8], mFocus: [0.5, 72, 46, 26], hot: [2.9, 84.8], tip: 'Tick two clients' },
+    focus: [1.4, 74.9, 97.1, 19.8], hot: [2.9, 84.8], tip: 'Tick two clients' },
   { img: '16', w: 2400, h: 1137, ch: 'Partner Compare', url: 'app.useimprint.design/studio/analytics',
     title: 'Run the comparison',
     body: 'IMPRINT reads both sessions together to find where they align — and where the creative tension lies.',
-    focus: [0.2, 0.3, 99.6, 6.4], mFocus: [54, 0, 46, 8], hot: [92.65, 3.6], tip: 'Run comparison' },
+    focus: [0.2, 0.3, 99.6, 6.4], hot: [92.65, 3.6], tip: 'Run comparison' },
   { img: '17', w: 1580, h: 1700, ch: 'Partner Compare', url: 'app.useimprint.design/report/partner',
     title: 'The Partner Aesthetic Report',
     body: 'Shared instinct, individual style weighting and a creative-tension score — so you can agree the brief before it becomes a debate.',
@@ -367,7 +502,7 @@ let current = -1;         // -1 = intro, STEPS.length = finale
 const layers = {};
 
 // Build image layers once (shared screenshots reuse a layer)
-STEPS.flatMap(s => [s.img, s.mImg]).filter(Boolean).forEach(img => {
+STEPS.map(s => s.img).forEach(img => {
   if (layers[img]) return;
   const d = document.createElement('div');
   d.className = 'layer';
@@ -387,43 +522,13 @@ CHAPTERS.forEach(name => {
 
 const mobile = window.matchMedia('(max-width: 720px)');
 
-// What a step shows on this device: phones may swap in a real mobile screenshot
-function view(s) {
-  if (mobile.matches && s.mImg) return { img: s.mImg, w: s.mw, h: s.mh, focus: null, hot: s.mHot, zoom: null };
-  return { img: s.img, w: s.w, h: s.h, focus: s.focus, hot: s.hot, zoom: mobile.matches ? (s.mFocus || s.focus) : null };
-}
-
-function sizeShot(s, zoomed = true) {
-  const v = view(s), vw = $('viewport').clientWidth;
-  if (!mobile.matches) {
-    // Fit the screenshot inside the viewport: full width, but never taller than the screen allows
-    const vh = EMBED ? hostVH : window.innerHeight;
-    const maxH = Math.max(420, vh - (EMBED ? 230 : 400));
-    shot.style.width = Math.min(vw, maxH * v.w / v.h) + 'px';
-    shot.style.height = '';
-    shot.style.aspectRatio = `${v.w} / ${v.h}`;
-    Object.assign(stage.style, { width: '100%', height: '100%', transform: 'none' });
-    stage.style.setProperty('--z', 1);
-    return;
-  }
-  // Phones: a window onto the screenshot, zoomed so the highlighted area is readable
-  const winW = s.mImg ? Math.min(vw, 440 * v.w / v.h) : vw;
-  const sw = winW, sh = winW * v.h / v.w;
-  let z = 1, tx = 0, ty = 0, winH = sh;
-  if (v.zoom && zoomed) {
-    const pad = 3, [fx, fy, fw, fh] = v.zoom;
-    const x0 = Math.max(0, fx - pad) / 100 * sw, y0 = Math.max(0, fy - pad) / 100 * sh;
-    const x1 = Math.min(100, fx + fw + pad) / 100 * sw, y1 = Math.min(100, fy + fh + pad) / 100 * sh;
-    z = Math.max(1, Math.min(3, winW / (x1 - x0), (winW * 0.85) / (y1 - y0)));
-    winH = Math.min(winW * 0.85, sh * z);
-    tx = Math.min(0, Math.max(winW - sw * z, winW / 2 - (x0 + x1) / 2 * z));
-    ty = Math.min(0, Math.max(winH - sh * z, winH / 2 - (y0 + y1) / 2 * z));
-  }
-  shot.style.width = winW + 'px';
-  shot.style.height = winH + 'px';
-  shot.style.aspectRatio = 'auto';
-  Object.assign(stage.style, { width: sw + 'px', height: sh + 'px', transform: `translate(${tx}px, ${ty}px) scale(${z})` });
-  stage.style.setProperty('--z', z);
+function sizeShot(s) {
+  // Fit the screenshot inside the viewport: full width, but never taller than the screen allows
+  const vw = $('viewport').clientWidth;
+  const vh = EMBED ? hostVH : window.innerHeight;
+  const maxH = Math.max(420, vh - (EMBED ? 230 : 400));
+  shot.style.width = Math.min(vw, maxH * s.w / s.h) + 'px';
+  shot.style.aspectRatio = `${s.w} / ${s.h}`;
 }
 const thread = $('thread'), threadPath = $('threadPath'), threadDot = $('threadDot'), guide = $('guide');
 
@@ -514,23 +619,23 @@ function go(i) {
   $('introOverlay').classList.toggle('on', intro);
   $('finaleOverlay').classList.toggle('on', finale);
 
-  const s = STEPS[intro ? 0 : finale ? STEPS.length - 1 : i], v = view(s);
-  sizeShot(s, !intro && !finale);
-  Object.entries(layers).forEach(([k, el]) => el.classList.toggle('on', k === v.img));
+  const s = STEPS[intro ? 0 : finale ? STEPS.length - 1 : i];
+  sizeShot(s);
+  Object.entries(layers).forEach(([k, el]) => el.classList.toggle('on', k === s.img));
   $('url').textContent = s.url;
 
   // Spotlight
-  if (v.focus && !intro && !finale) {
-    const [x, y, w, h] = v.focus;
+  if (s.focus && !intro && !finale) {
+    const [x, y, w, h] = s.focus;
     Object.assign(focus.style, { left: x + '%', top: y + '%', width: w + '%', height: h + '%' });
     focus.classList.add('on');
   } else focus.classList.remove('on');
 
   // Marker
   hotspot.className = 'hotspot';
-  if (v.hot && !intro && !finale) {
-    hotspot.style.left = v.hot[0] + '%';
-    hotspot.style.top = v.hot[1] + '%';
+  if (s.hot && !intro && !finale) {
+    hotspot.style.left = s.hot[0] + '%';
+    hotspot.style.top = s.hot[1] + '%';
     $('hotspotBtn').setAttribute('aria-label', s.tip);
     requestAnimationFrame(() => hotspot.classList.add('on'));
   }
@@ -561,11 +666,128 @@ function go(i) {
     b.classList.toggle('active', k === chIdx);
     b.classList.toggle('done', finale || k < chIdx);
   });
-  const active = $('chapters').children[chIdx];
-  if (active) active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  const active = $('chapters').children[chIdx], bar = $('chapters');
+  if (active) bar.scrollTo({ left: active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2, behavior: 'smooth' });
 }
 
 $('startBtn').onclick = () => go(0);
+
+// ---------- Phones: tap through the real mobile Studio ----------
+// `hot` is the tap target [x%, y%] on the screen; other steps show a pill at the bottom: a scroll prompt, or a next prompt
+const PHONE_STEPS = [
+  { img: '01', ch: 'Dashboard', title: 'Your studio, at a glance', body: 'Every finished client session lands here, ready to review.', hot: [88.2, 8.1], tip: 'Open Studio CMS' },
+  { img: '02', ch: 'Branding', title: 'Make it unmistakably yours', body: 'Your logo and studio name, on every screen and PDF.', hot: [42.4, 19.7], tip: 'Open Library' },
+  { img: '03', ch: 'Library', title: 'Upload your images', body: 'Single images, a zip file or a whole folder.', scroll: true, tip: 'Scroll to your images' },
+  { img: '04', ch: 'Library', title: 'Filter, tag and organise', body: 'Filter by room or style, and batch-tag in seconds.', hot: [84.6, 58.8], tip: 'Batch tag' },
+  { img: '05', ch: 'Tags', title: 'Define your aesthetic language', body: 'Create the style categories your studio works in.', scroll: true, tip: 'Scroll to rooms' },
+  { img: '06', ch: 'Tags', title: 'Rooms and spaces', body: 'Add your own rooms, from hallways to guest suites.', hot: [49.7, 37.1], tip: 'Add a room' },
+  { img: '07', ch: 'Client Links', title: 'Create a client link', body: "Type your client's name to start their private session.", hot: [50, 47.4], tip: 'Enter a name' },
+  { img: '08', ch: 'Client Links', title: 'Generate and send', body: 'One tap creates a branded link, ready to share.', hot: [50, 77.9], tip: 'Generate link' },
+  { img: '09', ch: 'Analytics', title: 'Studio intelligence', body: 'Every session, trend and top style in one place.', scroll: true, tip: 'Scroll to your clients' },
+  { img: '10', ch: 'Analytics', title: 'Every client, decoded', body: 'Dominant style, confidence and the images they chose.', hot: [62.8, 33.3], tip: 'Open report' },
+  { img: '11', ch: 'Reports', title: 'The Aesthetic Intelligence Report', body: 'A written read of their taste, scored and weighted.', scroll: true, tip: 'Keep scrolling' },
+  { img: '12', ch: 'Reports', title: 'How they chose', body: 'Decisiveness, consistency and how every style weighs up.', scroll: true, tip: 'Scroll to their selections' },
+  { img: '13', ch: 'Reports', title: 'What they chose', body: 'The exact images behind every insight.', tip: 'Next: Partner comparison' },
+  { img: '14', ch: 'Partner Compare', title: 'Designing for a couple?', body: 'Tick both partners, then run the comparison.', hot: [67.9, 37.6], tip: 'Run comparison' },
+  { img: '15', ch: 'Partner Compare', title: 'Partner report ready', body: 'Their compatibility score, in seconds.', hot: [24.3, 15], tip: 'Download PDF' },
+  { img: '16', ch: 'Partner Compare', title: 'The Partner Aesthetic Report', body: 'Where they align, and where the tension lies.', scroll: true, tip: 'Scroll' },
+  { img: '17', ch: 'Partner Compare', title: 'Agree the brief, together', body: 'Shared images, discussion points and one design language.', tip: 'Finish the tour' },
+];
+
+const pScreen = $('ptScreen'), pHot = $('ptHot'), pLayers = [], pad2 = n => String(n).padStart(2, '0');
+let pAt = -1;
+PHONE_STEPS.forEach((st, k) => {
+  const d = document.createElement('div');
+  d.className = 'layer';
+  d.innerHTML = `<img src="screens/phone/${st.img}.webp" alt="" decoding="async" loading="${k < 3 ? 'eager' : 'lazy'}">`;
+  pHot.parentNode.insertBefore(d, pHot);
+  pLayers.push(d);
+  $('ptDots').appendChild(document.createElement('i'));
+});
+
+// Fit the phone to the screen height so caption, phone and controls are all visible at once
+function sizePhone() {
+  const vh = EMBED ? hostVH : window.innerHeight;
+  const w = Math.min(320, document.querySelector('.ptour').clientWidth - 32, (vh - 250) / (1951 / 900) + 22);
+  document.querySelector('.ptour').style.setProperty('--pw', Math.max(220, w) + 'px');
+}
+
+function pGo(k) {
+  const end = k === PHONE_STEPS.length;
+  k = Math.max(0, Math.min(PHONE_STEPS.length, k));
+  if (k === pAt) return;
+  const prev = pAt, st = PHONE_STEPS[Math.min(k, PHONE_STEPS.length - 1)];
+  const scrolled = prev >= 0 && k === prev + 1 && PHONE_STEPS[prev].scroll;
+  pAt = k;
+
+  // Screen: scroll steps slide up, taps cross-fade
+  pLayers.forEach((el, i) => {
+    const show = i === Math.min(k, PHONE_STEPS.length - 1);
+    el.classList.remove('from-below', 'to-above');
+    if (show && !el.classList.contains('on') && scrolled) {
+      el.classList.add('from-below');
+      void el.offsetWidth;
+      el.classList.remove('from-below');
+    }
+    if (!show && el.classList.contains('on') && scrolled) el.classList.add('to-above');
+    el.classList.toggle('on', show);
+  });
+  $('ptEnd').classList.toggle('on', end);
+
+  // Tap target
+  pHot.className = 'pt-hot';
+  if (!end) {
+    const [x, y] = st.hot || [50, 96];
+    Object.assign(pHot.style, { left: x + '%', top: y + '%' });
+    if (!st.hot) pHot.classList.add('pill', st.scroll ? 'scroll' : 'forward');
+    else {
+      if (y > 80) pHot.classList.add('up');
+      if (x > 75) pHot.classList.add('left'); else if (x < 25) pHot.classList.add('right');
+    }
+    const arrow = st.scroll ? 'M12 5v14M6 13l6 6 6-6' : 'M5 12h14M13 6l6 6-6 6';
+    $('ptLabel').innerHTML = st.hot ? st.tip
+      : `${st.tip} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="${arrow}"/></svg>`;
+    $('ptRing').setAttribute('aria-label', st.tip);
+    requestAnimationFrame(() => pHot.classList.add('on'));
+  }
+
+  // Caption
+  const cap = $('ptCap');
+  cap.classList.add('swap');
+  setTimeout(() => {
+    $('ptCh').textContent = end ? 'Tour complete' : st.ch;
+    $('ptNum').textContent = end ? '' : `${pad2(k + 1)} / ${PHONE_STEPS.length}`;
+    $('ptTitle').textContent = end ? "That's the Studio." : st.title;
+    $('ptBody').textContent = end ? 'Most studios are live the same day.' : st.body;
+    cap.classList.remove('swap');
+  }, 160);
+
+  [...$('ptDots').children].forEach((d, i) => { d.classList.toggle('on', i === k); d.classList.toggle('done', i < k || end); });
+  $('ptPrev').disabled = k === 0;
+  $('ptNext').disabled = end;
+}
+
+$('ptRing').onclick = () => pGo(pAt + 1);
+$('ptLabel').onclick = () => { if (PHONE_STEPS[pAt] && !PHONE_STEPS[pAt].hot) pGo(pAt + 1); };
+$('ptNext').onclick = () => pGo(pAt + 1);
+$('ptPrev').onclick = () => pGo(pAt - 1);
+$('ptReplay').onclick = () => pGo(0);
+
+// Swipe up on a scroll step, or left/right anywhere, to move on
+let pTouch = null;
+pScreen.addEventListener('touchstart', e => { pTouch = e.touches[0]; }, { passive: true });
+pScreen.addEventListener('touchend', e => {
+  if (!pTouch) return;
+  const t = e.changedTouches[0], dx = t.clientX - pTouch.clientX, dy = t.clientY - pTouch.clientY;
+  pTouch = null;
+  const st = PHONE_STEPS[pAt];
+  if (st && st.scroll && dy < -40 && Math.abs(dy) > Math.abs(dx)) return pGo(pAt + 1);
+  if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) pGo(pAt + (dx < 0 ? 1 : -1));
+}, { passive: true });
+
+sizePhone();
+pGo(0);
+
 $('restartBtn').onclick = () => go(0);
 $('hotspotBtn').onclick = () => go(current + 1);
 $('nextBtn').onclick = () => go(current + 1);
@@ -577,6 +799,7 @@ document.addEventListener('keydown', e => {
 // Re-run the current step, e.g. after a resize switches between phone and desktop layouts
 function refresh() {
   const i = current; current = NaN; go(i);
+  sizePhone();
 }
 window.addEventListener('resize', refresh);
 
