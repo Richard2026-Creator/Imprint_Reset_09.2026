@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMPRINT Studio Tour</title>
+<meta name="description" content="An interactive walkthrough of IMPRINT Studio — branding, image library, tags, client links, analytics and reports.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script>
+  // Embedded on the homepage: drop the page chrome and (optionally) adapt to a dark section
+  const EMBED = window.self !== window.top;
+  if (EMBED) document.documentElement.classList.add('embed');
+  if (new URLSearchParams(location.search).get('theme') === 'dark') document.documentElement.classList.add('dark');
+</script>
+<style>
+  :root {
+    --ink: #0e0d0b;
+    --mid: #5c5750;
+    --soft: #9a9490;
+    --stone: #f5f2ec;
+    --warm: #ede8e0;
+    --warmer: #e2dbd0;
+    --gold: #b89a68;
+    --gold-deep: #84632f;
+    --gold-lt: #ceaf82;
+    --paper: #fbfaf7;
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--stone); color: var(--ink); }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 48px) clamp(16px, 4vw, 48px) 40px;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  .tour { max-width: 1240px; margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+  .tour-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; flex-wrap: wrap; }
+  .eyebrow { font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--gold-deep); font-weight: 500; }
+  .tour-head h1 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(30px, 4vw, 46px); line-height: 1.05; margin-top: 8px; }
+  .tour-head h1 em { color: var(--gold-deep); }
+  .counter { font-size: 12px; letter-spacing: .2em; color: var(--soft); text-transform: uppercase; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Chapters ---------- */
+  .chapters { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 14px; padding-bottom: 2px; }
+  .chapters::-webkit-scrollbar { display: none; }
+  .chapter {
+    flex: none; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 500;
+    padding: 9px 14px; border-radius: 999px; color: var(--mid); border: 1px solid var(--warmer);
+    background: rgba(255,255,255,.4); transition: all .25s var(--ease);
+  }
+  .chapter:hover { border-color: var(--gold-lt); color: var(--ink); }
+  .chapter.done { color: var(--gold-deep); border-color: var(--gold-lt); }
+  .chapter.active { background: var(--ink); color: var(--stone); border-color: var(--ink); }
+  .tour.intro .chapters { visibility: hidden; }
+
+  /* ---------- Browser frame ---------- */
+  .frame {
+    background: #fff; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 1px 0 rgba(14,13,11,.04), 0 30px 60px -30px rgba(14,13,11,.35), 0 10px 24px -12px rgba(14,13,11,.12);
+    border: 1px solid var(--warmer);
+  }
+  .chrome { height: 38px; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: var(--warm); border-bottom: 1px solid var(--warmer); }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--warmer); }
+  .url {
+    flex: 1; max-width: 420px; margin: 0 auto; height: 24px; border-radius: 6px; background: rgba(255,255,255,.75);
+    font-size: 11.5px; color: var(--soft); display: flex; align-items: center; justify-content: center; gap: 6px;
+    white-space: nowrap; overflow: hidden; padding: 0 10px;
+  }
+  .url svg { flex: none; }
+  .chrome .spacer { width: 42px; }
+
+  .viewport { position: relative; background: var(--paper); display: grid; place-items: center; overflow: hidden; transition: min-height .4s var(--ease); }
+  .shot { position: relative; width: 100%; overflow: hidden; transition: width .5s var(--ease), height .5s var(--ease); }
+  .stage { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 0 0; transition: transform .6s var(--ease); }
+  .shot img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+  .shot .layer { position: absolute; inset: 0; opacity: 0; transition: opacity .55s var(--ease), transform .7s var(--ease); transform: scale(1.012); }
+  .shot .layer.on { opacity: 1; transform: none; }
+
+  /* Spotlight */
+  .focus {
+    position: absolute; border-radius: 12px; pointer-events: none;
+    box-shadow: 0 0 0 200vmax rgba(14,13,11,.22);
+    outline: calc(1.5px / var(--z, 1)) solid rgba(184,154,104,.9); outline-offset: calc(3px / var(--z, 1));
+    transition: all .6s var(--ease); opacity: 0;
+  }
+  .focus.on { opacity: 1; }
+
+  /* Hotspot */
+  .hotspot {
+    position: absolute; width: 0; height: 0; z-index: 3; opacity: 0; pointer-events: none;
+    transition: opacity .4s var(--ease) .35s;
+  }
+  .hotspot.on { opacity: 1; pointer-events: auto; }
+  .hotspot .dot {
+    position: absolute; left: -17px; top: -17px; width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(184,154,104,.25); border: 2px solid var(--gold); cursor: pointer;
+    transform: scale(calc(1 / var(--z, 1)));  /* stay the same size when the stage is zoomed */
+    display: grid; place-items: center;
+  }
+  .hotspot .dot::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px #fff; }
+  .hotspot .dot::after {
+    content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--gold);
+    animation: pulse 1.8s var(--ease) infinite;
+  }
+  @keyframes pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(2.3); opacity: 0; } }
+  /* Intro + finale overlays */
+  .overlay {
+    position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; text-align: center; padding: 24px;
+    background: rgba(245,242,236,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    opacity: 0; pointer-events: none; transition: opacity .5s var(--ease);
+  }
+  .overlay.on { opacity: 1; pointer-events: auto; }
+  .overlay .inner { max-width: 520px; }
+  .overlay h2 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(28px, 4.2vw, 52px); line-height: 1.05; margin: 12px 0 14px; }
+  .overlay h2 em { color: var(--gold-deep); }
+  .overlay p { color: var(--mid); font-size: clamp(14px, 1.4vw, 16px); line-height: 1.6; }
+  .overlay .meta { margin-top: 18px; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 15px 28px;
+    font-size: 12px; letter-spacing: .2em; text-transform: uppercase; font-weight: 500; text-decoration: none;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s;
+  }
+  .btn-ink { background: var(--ink); color: var(--stone); box-shadow: 0 14px 30px -14px rgba(14,13,11,.6); }
+  .btn-ink:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -14px rgba(14,13,11,.7); }
+  .btn-line { border: 1px solid var(--warmer); color: var(--ink); background: rgba(255,255,255,.6); }
+  .btn-line:hover { border-color: var(--gold); }
+  .btn-start { margin-top: 26px; position: relative; }
+  .btn-start::after { content: ""; position: absolute; inset: -6px; border-radius: 999px; border: 1px solid var(--gold); animation: ring 2.2s var(--ease) infinite; }
+  @keyframes ring { from { transform: scale(.96); opacity: .8; } to { transform: scale(1.12); opacity: 0; } }
+  .finale-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+  .linkish { margin-top: 18px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); text-decoration: underline; text-underline-offset: 4px; }
+  .linkish:hover { color: var(--ink); }
+
+  /* ---------- Guide card (lives inside the frame) ---------- */
+  .guide {
+    position: absolute; z-index: 4; width: 304px; left: 0; top: 0;
+    background: rgba(255,255,255,.94); backdrop-filter: blur(14px) saturate(1.1); -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border: 1px solid rgba(206,175,130,.55); border-radius: 16px; padding: 20px 22px 18px;
+    box-shadow: 0 24px 50px -22px rgba(14,13,11,.45), 0 4px 14px -6px rgba(14,13,11,.12);
+    transition: left .6s var(--ease), top .6s var(--ease), opacity .4s var(--ease);
+  }
+  .tour.intro .guide, .tour.finale .guide { opacity: 0; pointer-events: none; }
+  .guide .top { display: flex; justify-content: space-between; align-items: center; }
+  .guide .step { font-size: 11px; letter-spacing: .18em; color: var(--soft); font-variant-numeric: tabular-nums; }
+  .guide h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 25px; line-height: 1.12; margin: 8px 0 8px; }
+  .guide p { color: var(--mid); font-size: 14px; line-height: 1.6; }
+  .guide .body > * { transition: opacity .28s var(--ease), transform .4s var(--ease); }
+  .guide.swap .body > * { opacity: 0; transform: translateY(5px); }
+  .guide .actions { display: flex; gap: 8px; align-items: center; margin-top: 16px; }
+  .guide .back { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--warmer); display: grid; place-items: center; transition: border-color .2s; }
+  .guide .back:hover { border-color: var(--gold); }
+  .guide .back:disabled { opacity: .35; cursor: default; }
+  .guide .next { flex: 1; justify-content: space-between; padding: 12px 18px; font-size: 11px; letter-spacing: .16em; }
+  .guide .next .gem { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px rgba(184,154,104,.3); flex: none; }
+  .guide .hint { margin-top: 12px; font-size: 11px; color: var(--soft); letter-spacing: .04em; }
+  .guide .hint[hidden] { display: none; }
+
+  /* Gold thread from the card to the marker */
+  .thread { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible; }
+  .thread path { fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-linecap: round; transition: stroke-dashoffset .7s var(--ease) .35s, opacity .3s; }
+  .thread circle { fill: var(--gold); transition: opacity .3s .3s; }
+  .thread.off path, .thread.off circle { opacity: 0; transition: none; }
+
+  /* Progress + counter inside the browser chrome */
+  .chrome { position: relative; }
+  .chrome .count { width: 52px; text-align: right; font-size: 11px; letter-spacing: .14em; color: var(--soft); font-variant-numeric: tabular-nums; }
+  .chrome .bar { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; background: var(--gold); transition: width .6s var(--ease); }
+
+  @media (max-width: 720px) {
+    .chrome .url { font-size: 10px; }
+    .chrome .count { width: auto; }
+    .hotspot .dot { left: -13px; top: -13px; width: 26px; height: 26px; }
+    .overlay .meta { display: none; }
+    .viewport { display: block; }
+    .shot { margin: 0 auto; }
+    .tour.intro .viewport, .tour.finale .viewport { min-height: 470px; }
+    .guide {
+      position: relative; left: auto !important; top: auto !important; width: auto;
+      border: 0; border-top: 1px solid var(--warmer); border-radius: 0; box-shadow: none;
+      background: #fff; backdrop-filter: none; padding: 18px 18px 20px;
+    }
+    .tour.intro .guide, .tour.finale .guide { display: none; }
+    .guide h3 { font-size: 23px; }
+    .thread { display: none; }
+  }
+  /* ---------- Embedded mode ---------- */
+  html.embed, html.embed body { background: transparent; }
+  html.embed body { padding: 2px 2px 34px; }
+  html.embed .tour-head { display: none; }
+  html.dark .chapters { justify-content: center; }
+  html.dark .chapter { color: rgba(245,242,236,.62); border-color: rgba(245,242,236,.16); background: rgba(245,242,236,.03); }
+  html.dark .chapter:hover { color: var(--stone); border-color: rgba(206,175,130,.6); }
+  html.dark .chapter.done { color: var(--gold-lt); border-color: rgba(206,175,130,.45); }
+  html.dark .chapter.active { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+  html.dark .frame { border-color: rgba(245,242,236,.1); box-shadow: 0 40px 80px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(184,154,104,.12); }
+  html.embed .tour.intro .chapters { visibility: visible; }
+  @media (max-width: 720px) { html.dark .chapters { justify-content: flex-start; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<main class="tour intro" id="tour">
+  <header class="tour-head">
+    <div>
+      <div class="eyebrow">Interactive walkthrough</div>
+      <h1>Inside <em>IMPRINT</em> Studio</h1>
+    </div>
+  </header>
+
+  <nav class="chapters" id="chapters" aria-label="Tour chapters"></nav>
+
+  <div class="frame">
+    <div class="chrome" aria-hidden="true">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="url">app.useimprint.design/studio</span></div>
+      <div class="count" id="counter"></div>
+      <i class="bar" id="bar"></i>
+    </div>
+    <div class="viewport" id="viewport">
+      <div class="shot" id="shot">
+        <div class="stage" id="stage">
+          <div class="focus" id="focus"></div>
+          <div class="hotspot" id="hotspot"><button class="dot" id="hotspotBtn" aria-label="Continue"></button></div>
+        </div>
+      </div>
+
+      <svg class="thread off" id="thread" aria-hidden="true"><path id="threadPath"/><circle id="threadDot" r="3"/></svg>
+
+      <section class="guide" id="guide" aria-live="polite">
+        <div class="body">
+          <div class="top"><span class="eyebrow" id="capChapter"></span><span class="step" id="capStep"></span></div>
+          <h3 id="capTitle"></h3>
+          <p id="capBody"></p>
+        </div>
+        <div class="actions">
+          <button class="back" id="backBtn" aria-label="Previous step">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          </button>
+          <button class="btn btn-ink next" id="nextBtn"><span id="nextLabel">Next</span><i class="gem"></i></button>
+        </div>
+        <div class="hint" id="hint">Or click the pulsing gold marker · ← → keys work too</div>
+      </section>
+
+      <div class="overlay on" id="introOverlay">
+        <div class="inner">
+          <div class="eyebrow">Studio CMS · 2 minute tour</div>
+          <h2>See how your studio <em>runs</em> on IMPRINT.</h2>
+          <p>Click through the real Studio interface — from branding your experience to sending a client link and reading their Aesthetic Intelligence report.</p>
+          <button class="btn btn-ink btn-start" id="startBtn">Start here
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <div class="meta">Follow the gold thread · ← → keys work too</div>
+        </div>
+      </div>
+
+      <div class="overlay" id="finaleOverlay">
+        <div class="inner">
+          <div class="eyebrow">Tour complete</div>
+          <h2>Your studio's taste,<br><em>made measurable.</em></h2>
+          <p>Branded discovery sessions, client intelligence and partner reports — ready for your next consultation.</p>
+          <div class="finale-actions">
+            <a class="btn btn-ink" href="/#pricing" target="_top">Start free trial</a>
+            <a class="btn btn-line" href="sample-partner-report.pdf" target="_blank" rel="noopener">Sample partner report</a>
+          </div>
+          <button class="linkish" id="restartBtn">Replay the tour</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* Each step: screenshot, size, chapter, copy, optional spotlight `focus` [x, y, w, h]
+   and `hot` click target [x, y] — all as percentages of the screenshot.
+   Phones zoom into `mFocus` (or `focus`); `mImg`/`mw`/`mh`/`mHot` swap in a real mobile screenshot. */
+const STEPS = [
+  { img: '01', w: 2400, h: 1142, ch: 'Dashboard', url: 'app.useimprint.design/studio',
+    title: 'Your studio, at a glance',
+    body: 'Every completed client session lands here with an aesthetic profile ready to review. Start a new session or open your image library in one click.',
+    hot: [94.35, 6.3], tip: 'Open Studio CMS' },
+  { img: '02', w: 2400, h: 1118, ch: 'Branding', url: 'app.useimprint.design/studio/branding',
+    title: 'Make it unmistakably yours',
+    body: 'Upload your logo and set your studio name. They appear throughout the client experience and on every PDF report — fully white-labelled.',
+    focus: [36.4, 27, 40.6, 49.3], hot: [6.4, 22.4], tip: 'Next: Image Library' },
+  { img: '03', w: 2400, h: 1153, ch: 'Library', url: 'app.useimprint.design/studio/library',
+    title: 'Curate your image library',
+    body: 'Upload single images, a zip file or an entire local folder. Every image becomes part of the visual discovery your clients move through.',
+    focus: [36.4, 27.6, 40.75, 24.2], hot: [38.6, 88.4], tip: 'See your images' },
+  { img: '04', w: 2400, h: 1150, ch: 'Library', url: 'app.useimprint.design/studio/library',
+    title: 'Filter, tag and organise',
+    body: 'Filter by room or style and batch-tag images in seconds. Tags are what power the intelligence behind every client profile.',
+    focus: [35.7, 28.5, 41.1, 71.5], mFocus: [35.7, 20, 41.1, 60], hot: [74.4, 23.5], tip: 'Next: Tags' },
+  { img: '05', w: 2400, h: 1108, ch: 'Tags', url: 'app.useimprint.design/studio/tags',
+    title: 'Define your aesthetic language',
+    body: 'Create the style categories that matter to your studio — from Japandi to Luxury Glamour. IMPRINT maps every client choice against them.',
+    focus: [36.4, 27.8, 40.5, 58.8], hot: [72.35, 34.3], tip: 'Add a style' },
+  { img: '06', w: 2400, h: 1147, ch: 'Tags', url: 'app.useimprint.design/studio/tags',
+    title: 'Rooms and spaces',
+    body: 'Built-in rooms cover the essentials. Add your own spaces — a hallway, a boot room, a guest suite — to match how your studio works.',
+    focus: [36.3, 59.4, 40.6, 37], hot: [72.05, 65.7], tip: 'Next: Client Links' },
+  { img: '07', w: 2400, h: 1132, ch: 'Client Links', url: 'app.useimprint.design/studio/links',
+    title: 'Create a personalised client link',
+    body: 'Enter your client’s name to create a private discovery session, presented in your branding.',
+    focus: [36.45, 27.4, 40.25, 33.9], hot: [56.55, 36.2], tip: 'Enter a client name' },
+  { img: '08', w: 2400, h: 1135, ch: 'Client Links', url: 'app.useimprint.design/studio/links',
+    title: 'Scope it to a room — or don’t',
+    body: 'Focus the session on a single room, or leave it open to your full library. Then generate the link.',
+    focus: [38, 41.4, 37.4, 9.4], mFocus: [38, 40, 37.4, 18], hot: [71.5, 55], tip: 'Generate link' },
+  { img: '09', w: 2400, h: 1132, ch: 'Client Links', url: 'app.useimprint.design/studio/links',
+    title: 'Send it in one click',
+    body: 'Copy the personalised link and share it however you like — email, WhatsApp, or straight after a consultation.',
+    focus: [38.2, 62.2, 37.2, 16.5], hot: [73.3, 70.4], tip: 'Copy link' },
+  { img: '10', w: 2400, h: 1127, ch: 'Client View', url: 'app.useimprint.design/?client=Natasha%20Church',
+    title: 'What your client sees',
+    body: 'A calm, branded welcome made just for them. They begin a short, instinctive visual session — no forms, no jargon.',
+    hot: [56.6, 66.9], tip: 'Begin discovery',
+    mImg: '10m', mw: 567, mh: 1256, mHot: [80, 67] },
+  { img: '11', w: 2400, h: 1141, ch: 'Analytics', url: 'app.useimprint.design/studio/analytics',
+    title: 'Studio intelligence',
+    body: 'Every session in one place: total sessions, average decisiveness and the styles trending across your clients. Export to CSV at any time.',
+    focus: [1.2, 15.6, 97.6, 32.6], hot: [8.3, 75.1], tip: 'See every client' },
+  { img: '12', w: 2400, h: 1121, ch: 'Analytics', url: 'app.useimprint.design/studio/analytics',
+    title: 'Every client, decoded',
+    body: 'Dominant styles, decisiveness and the images they actually chose — at a glance. Open the full report or download a polished PDF.',
+    focus: [1, 7.6, 97.4, 10.5], mFocus: [55, 4, 44, 17], hot: [84.8, 12.85], tip: 'View report' },
+  { img: '13', w: 2400, h: 1258, ch: 'Reports', url: 'app.useimprint.design/report/natasha-church',
+    title: 'The Aesthetic Intelligence Report',
+    body: 'A written narrative of your client’s taste, with decisiveness, consistency and a weighting across every style in your library.',
+    focus: [3.3, 50.6, 93.2, 47.8], mFocus: [2, 48, 50, 48], hot: [7.6, 87.2], tip: 'See their selections' },
+  { img: '14', w: 2400, h: 1273, ch: 'Reports', url: 'app.useimprint.design/report/natasha-church',
+    title: 'What they chose — and what didn’t land',
+    body: 'See the exact images your client chose, plus the styles they consistently moved away from. Invaluable before the first design meeting.',
+    focus: [3.4, 21.3, 55.6, 40.3], hot: [8.9, 86.5], tip: 'Next: Partner comparison' },
+  { img: '16', w: 2400, h: 1137, ch: 'Partner Compare', url: 'app.useimprint.design/studio/analytics',
+    title: 'Designing for a couple?',
+    body: 'Tick any two client rows to compare their aesthetic profiles side by side.',
+    focus: [1.4, 74.9, 97.1, 19.8], mFocus: [0.5, 72, 46, 26], hot: [2.9, 84.8], tip: 'Tick two clients' },
+  { img: '16', w: 2400, h: 1137, ch: 'Partner Compare', url: 'app.useimprint.design/studio/analytics',
+    title: 'Run the comparison',
+    body: 'IMPRINT reads both sessions together to find where they align — and where the creative tension lies.',
+    focus: [0.2, 0.3, 99.6, 6.4], mFocus: [54, 0, 46, 8], hot: [92.65, 3.6], tip: 'Run comparison' },
+  { img: '17', w: 1580, h: 1700, ch: 'Partner Compare', url: 'app.useimprint.design/report/partner',
+    title: 'The Partner Aesthetic Report',
+    body: 'Shared instinct, individual style weighting and a creative-tension score — so you can agree the brief before it becomes a debate.',
+    focus: [6.4, 28.5, 87.3, 18.2] },
+];
+
+const CHAPTERS = [...new Set(STEPS.map(s => s.ch))];
+let hostVH = 900;   // host page's viewport height, sent by the embedding page
+const $ = id => document.getElementById(id);
+const tour = $('tour'), shot = $('shot'), stage = $('stage'), focus = $('focus'), hotspot = $('hotspot');
+let current = -1;         // -1 = intro, STEPS.length = finale
+const layers = {};
+
+// Build image layers once (shared screenshots reuse a layer)
+STEPS.flatMap(s => [s.img, s.mImg]).filter(Boolean).forEach(img => {
+  if (layers[img]) return;
+  const d = document.createElement('div');
+  d.className = 'layer';
+  d.innerHTML = `<img src="screens/${img}.webp" alt="" decoding="async">`;
+  stage.insertBefore(d, focus);
+  layers[img] = d;
+});
+
+// Chapter pills
+CHAPTERS.forEach(name => {
+  const b = document.createElement('button');
+  b.className = 'chapter';
+  b.textContent = name;
+  b.onclick = () => go(STEPS.findIndex(s => s.ch === name));
+  $('chapters').appendChild(b);
+});
+
+const mobile = window.matchMedia('(max-width: 720px)');
+
+// What a step shows on this device: phones may swap in a real mobile screenshot
+function view(s) {
+  if (mobile.matches && s.mImg) return { img: s.mImg, w: s.mw, h: s.mh, focus: null, hot: s.mHot, zoom: null };
+  return { img: s.img, w: s.w, h: s.h, focus: s.focus, hot: s.hot, zoom: mobile.matches ? (s.mFocus || s.focus) : null };
+}
+
+function sizeShot(s, zoomed = true) {
+  const v = view(s), vw = $('viewport').clientWidth;
+  if (!mobile.matches) {
+    // Fit the screenshot inside the viewport: full width, but never taller than the screen allows
+    const vh = EMBED ? hostVH : window.innerHeight;
+    const maxH = Math.max(420, vh - (EMBED ? 230 : 400));
+    shot.style.width = Math.min(vw, maxH * v.w / v.h) + 'px';
+    shot.style.height = '';
+    shot.style.aspectRatio = `${v.w} / ${v.h}`;
+    Object.assign(stage.style, { width: '100%', height: '100%', transform: 'none' });
+    stage.style.setProperty('--z', 1);
+    return;
+  }
+  // Phones: a window onto the screenshot, zoomed so the highlighted area is readable
+  const winW = s.mImg ? Math.min(vw, 440 * v.w / v.h) : vw;
+  const sw = winW, sh = winW * v.h / v.w;
+  let z = 1, tx = 0, ty = 0, winH = sh;
+  if (v.zoom && zoomed) {
+    const pad = 3, [fx, fy, fw, fh] = v.zoom;
+    const x0 = Math.max(0, fx - pad) / 100 * sw, y0 = Math.max(0, fy - pad) / 100 * sh;
+    const x1 = Math.min(100, fx + fw + pad) / 100 * sw, y1 = Math.min(100, fy + fh + pad) / 100 * sh;
+    z = Math.max(1, Math.min(3, winW / (x1 - x0), (winW * 0.85) / (y1 - y0)));
+    winH = Math.min(winW * 0.85, sh * z);
+    tx = Math.min(0, Math.max(winW - sw * z, winW / 2 - (x0 + x1) / 2 * z));
+    ty = Math.min(0, Math.max(winH - sh * z, winH / 2 - (y0 + y1) / 2 * z));
+  }
+  shot.style.width = winW + 'px';
+  shot.style.height = winH + 'px';
+  shot.style.aspectRatio = 'auto';
+  Object.assign(stage.style, { width: sw + 'px', height: sh + 'px', transform: `translate(${tx}px, ${ty}px) scale(${z})` });
+  stage.style.setProperty('--z', z);
+}
+const thread = $('thread'), threadPath = $('threadPath'), threadDot = $('threadDot'), guide = $('guide');
+
+// Where the screenshot will sit once its resize animation finishes, in px
+function shotBox(s) {
+  const vw = $('viewport').clientWidth, w = parseFloat(shot.style.width), h = w * s.h / s.w;
+  return { x: (vw - w) / 2, y: 0, w, h, vw, vh: h };
+}
+const overlap = (a, b) =>
+  Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) *
+  Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+
+// Put the card where it hides the least of what matters, as close to the marker as possible
+function placeGuide(s) {
+  if (mobile.matches) { thread.classList.add('off'); return; }
+  const B = shotBox(s), m = 18, gw = guide.offsetWidth, gh = guide.offsetHeight;
+  const pct = (px, py) => ({ x: B.x + px / 100 * B.w, y: B.y + py / 100 * B.h });
+  const hot = s.hot ? pct(...s.hot) : null;
+  const f = s.focus ? (() => { const o = pct(s.focus[0], s.focus[1]); return { x: o.x, y: o.y, w: s.focus[2] / 100 * B.w, h: s.focus[3] / 100 * B.h }; })() : null;
+  const clampX = x => Math.min(Math.max(m, x), B.vw - gw - m), clampY = y => Math.min(Math.max(m, y), B.vh - gh - m);
+
+  const cands = [
+    { x: m, y: m }, { x: B.vw - gw - m, y: m }, { x: m, y: B.vh - gh - m }, { x: B.vw - gw - m, y: B.vh - gh - m },
+  ];
+  if (f) cands.push(
+    { x: clampX(f.x + f.w + 24), y: clampY((hot ? hot.y : f.y + f.h / 2) - gh / 2) },
+    { x: clampX(f.x - gw - 24),  y: clampY((hot ? hot.y : f.y + f.h / 2) - gh / 2) },
+    { x: clampX((hot ? hot.x : f.x + f.w / 2) - gw / 2), y: clampY(f.y + f.h + 24) },
+    { x: clampX((hot ? hot.x : f.x + f.w / 2) - gw / 2), y: clampY(f.y - gh - 24) });
+  if (hot) cands.push(
+    { x: clampX(hot.x + 60), y: clampY(hot.y - gh / 2) }, { x: clampX(hot.x - gw - 60), y: clampY(hot.y - gh / 2) },
+    { x: clampX(hot.x - gw / 2), y: clampY(hot.y + 60) }, { x: clampX(hot.x - gw / 2), y: clampY(hot.y - gh - 60) });
+
+  let best, bestScore = Infinity;
+  for (const c of cands) {
+    const r = { x: c.x, y: c.y, w: gw, h: gh };
+    let score = 0;
+    if (f) score += overlap(r, f) * 4;
+    if (hot) {
+      score += overlap(r, { x: hot.x - 40, y: hot.y - 40, w: 80, h: 80 }) * 60;
+      score += Math.hypot(c.x + gw / 2 - hot.x, c.y + gh / 2 - hot.y) * 12;
+      // the thread shouldn't slice through the spotlit area on its way to the marker
+      if (f) {
+        const sx = Math.min(Math.max(hot.x, r.x), r.x + r.w), sy = Math.min(Math.max(hot.y, r.y), r.y + r.h);
+        for (let t = 0; t <= 1; t += 0.05) {
+          const px = sx + (hot.x - sx) * t, py = sy + (hot.y - sy) * t;
+          if (Math.hypot(hot.x - px, hot.y - py) < 70) break;   // the last stretch to the marker is fine
+          if (px > f.x && px < f.x + f.w && py > f.y && py < f.y + f.h) score += 3000;
+        }
+      }
+    }
+    if (score < bestScore) { bestScore = score; best = c; }
+  }
+  guide.style.left = best.x + 'px';
+  guide.style.top = best.y + 'px';
+  drawThread(hot, { x: best.x, y: best.y, w: gw, h: gh });
+}
+
+// A soft gold curve from the nearest edge of the card to the marker
+function drawThread(hot, g) {
+  if (!hot) { thread.classList.add('off'); return; }
+  const sx = Math.min(Math.max(hot.x, g.x), g.x + g.w), sy = Math.min(Math.max(hot.y, g.y), g.y + g.h);
+  const fromSide = sx === g.x || sx === g.x + g.w;
+  const cx = fromSide ? hot.x : sx, cy = fromSide ? sy : hot.y;
+  // stop just short of the marker ring
+  const dx = hot.x - cx, dy = hot.y - cy, d = Math.hypot(dx, dy) || 1;
+  const ex = hot.x - dx / d * 22, ey = hot.y - dy / d * 22;
+  thread.classList.add('off');
+  threadPath.setAttribute('d', `M${sx},${sy} Q${cx},${cy} ${ex},${ey}`);
+  threadDot.setAttribute('cx', sx); threadDot.setAttribute('cy', sy);
+  const len = threadPath.getTotalLength();
+  threadPath.style.strokeDasharray = len;
+  threadPath.style.strokeDashoffset = len;
+  if (len < 8) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    thread.classList.remove('off');
+    threadPath.style.strokeDashoffset = 0;
+  }));
+}
+
+function go(i) {
+  i = Math.max(-1, Math.min(STEPS.length, i));
+  if (i === current) return;
+  current = i;
+  const intro = i === -1, finale = i === STEPS.length;
+  tour.classList.toggle('intro', intro);
+  tour.classList.toggle('finale', finale);
+  $('introOverlay').classList.toggle('on', intro);
+  $('finaleOverlay').classList.toggle('on', finale);
+
+  const s = STEPS[intro ? 0 : finale ? STEPS.length - 1 : i], v = view(s);
+  sizeShot(s, !intro && !finale);
+  Object.entries(layers).forEach(([k, el]) => el.classList.toggle('on', k === v.img));
+  $('url').textContent = s.url;
+
+  // Spotlight
+  if (v.focus && !intro && !finale) {
+    const [x, y, w, h] = v.focus;
+    Object.assign(focus.style, { left: x + '%', top: y + '%', width: w + '%', height: h + '%' });
+    focus.classList.add('on');
+  } else focus.classList.remove('on');
+
+  // Marker
+  hotspot.className = 'hotspot';
+  if (v.hot && !intro && !finale) {
+    hotspot.style.left = v.hot[0] + '%';
+    hotspot.style.top = v.hot[1] + '%';
+    $('hotspotBtn').setAttribute('aria-label', s.tip);
+    requestAnimationFrame(() => hotspot.classList.add('on'));
+  }
+
+  // Guide card: swap the words, then glide it into place
+  if (intro || finale) {
+    thread.classList.add('off');
+  } else {
+    guide.classList.add('swap');
+    setTimeout(() => {
+      $('capChapter').textContent = s.ch;
+      $('capStep').textContent = `${String(i + 1).padStart(2, '0')} / ${STEPS.length}`;
+      $('capTitle').textContent = s.title;
+      $('capBody').textContent = s.body;
+      $('nextLabel').textContent = i === STEPS.length - 1 ? 'Finish the tour' : (s.tip || 'Next');
+      $('hint').hidden = i !== 0;
+      $('backBtn').disabled = i === 0;
+      placeGuide(s);
+      guide.classList.remove('swap');
+    }, 200);
+  }
+
+  $('counter').textContent = intro ? '' : finale ? 'Done' : `${String(i + 1).padStart(2, '0')} / ${STEPS.length}`;
+  $('bar').style.width = intro ? '0%' : finale ? '100%' : ((i + 1) / STEPS.length * 100) + '%';
+
+  const chIdx = intro || finale ? -1 : CHAPTERS.indexOf(s.ch);
+  [...$('chapters').children].forEach((b, k) => {
+    b.classList.toggle('active', k === chIdx);
+    b.classList.toggle('done', finale || k < chIdx);
+  });
+  const active = $('chapters').children[chIdx];
+  if (active) active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+}
+
+$('startBtn').onclick = () => go(0);
+$('restartBtn').onclick = () => go(0);
+$('hotspotBtn').onclick = () => go(current + 1);
+$('nextBtn').onclick = () => go(current + 1);
+$('backBtn').onclick = () => go(current - 1);
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(current + 1);
+  if (e.key === 'ArrowLeft' && current > 0) go(current - 1);
+});
+// Re-run the current step, e.g. after a resize switches between phone and desktop layouts
+function refresh() {
+  const i = current; current = NaN; go(i);
+}
+window.addEventListener('resize', refresh);
+
+// Embedded: tell the host page how tall we are, and listen for its viewport height
+if (EMBED) {
+  const report = () => parent.postMessage({ imprintTourHeight: Math.ceil(tour.getBoundingClientRect().bottom + window.scrollY + 34) }, '*');
+  new ResizeObserver(report).observe(tour);
+  window.addEventListener('message', e => {
+    if (!e.data || !e.data.imprintTourVH) return;
+    hostVH = e.data.imprintTourVH;
+    refresh();
+    report();
+  });
+}
+
+// Show the dashboard behind the intro
+current = 0; go(-1);
+</script>
+</body>
+</html>

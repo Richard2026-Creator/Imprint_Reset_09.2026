@@ -1478,6 +1478,17 @@ footer {
     color: var(--gold-lt); border: 1px solid var(--gold-lt); padding: 4px 10px;
   }
 }
+/* ─── STUDIO TOUR EMBED ─── */
+.hero-tour-link {
+  display: inline-block; margin-top: 1.1rem; font-size: var(--fs-small); letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(245,242,236,.78); text-decoration: none; border-bottom: 1px solid rgba(206,175,130,.5); padding-bottom: 3px;
+  transition: color .2s, border-color .2s;
+}
+.hero-tour-link:hover { color: var(--gold-lt); border-color: var(--gold-lt); }
+.hero-tour-link.d-only { display: inline-block; }
+@media (max-width: 760px) { .hero-tour-link.d-only { display: none; } }
+.tour-embed { max-width: 1240px; margin: 0 auto; }
+.tour-embed iframe { display: block; width: 100%; height: 780px; border: 0; background: transparent; }
 </style>
 
 <!-- jsPDF: generates the demo's sample report client-side, no backend involved -->
@@ -1490,7 +1501,7 @@ footer {
   <a href="#" class="nav-logo"><img src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/IMPRINT%20Narrow.png" alt="IMPRINT" style="height:44px;width:auto;display:block;" /></a>
   <ul class="nav-links">
     <li><a href="#demo">Demo</a></li>
-    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#how-it-works">Studio Tour</a></li>
     <li><a href="#capabilities">Capabilities</a></li>
     <li><a href="#pricing">Pricing</a></li>
     <li><a href="#faq">FAQ</a></li>
@@ -1505,7 +1516,7 @@ footer {
 <!-- MOBILE DRAWER -->
 <ul class="nav-drawer" id="nav-drawer">
   <li><a href="#demo" onclick="closeDrawer()">Demo</a></li>
-  <li><a href="#how-it-works" onclick="closeDrawer()">How It Works</a></li>
+  <li><a href="#how-it-works" onclick="closeDrawer()">Studio Tour</a></li>
   <li><a href="#capabilities" onclick="closeDrawer()">Capabilities</a></li>
   <li><a href="#pricing" onclick="closeDrawer()">Pricing</a></li>
   <li><a href="#faq" onclick="closeDrawer()">FAQ</a></li>
@@ -1544,6 +1555,7 @@ footer {
         <a href="#demo" class="btn-gold">Try The Demo</a>
         <a href="https://app.useimprint.design/#/?signup" target="_blank" class="hero-trial-link m-only">Start free trial · No card required</a>
       </div>
+      <a href="#how-it-works" class="hero-tour-link d-only">or take the Studio tour <span aria-hidden="true">&rarr;</span></a>
     </div>
     <div class="hero-right"></div>
   </div>
@@ -1766,58 +1778,16 @@ footer {
   </div>
 </section>
 
-<!-- 5. HOW IT WORKS -->
+<!-- 5. STUDIO TOUR -->
 <section class="method reveal" id="how-it-works">
   <div class="container">
     <div class="section-header">
-      <span class="label" style="color:var(--gold)">Getting Started</span>
+      <span class="label" style="color:var(--gold)">Studio Tour</span>
       <h2>From sign-up to <em>branded report,</em> in five steps.</h2>
-      <p>No integration to build. Nothing for your client to install.</p>
+      <p>This is the real IMPRINT Studio. Click through it yourself. Most studios are live the same day.</p>
     </div>
-    <div class="steps-layout">
-      <div class="steps-video-wrap">
-        <video controls preload="auto">
-          <source src="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/IMPRINT%20Demo%20NEW.mp4#t=0.001" type="video/mp4">
-        </video>
-        <p class="steps-video-label">Watch It Work</p>
-      </div>
-      <div class="steps-timeline reveal-stagger">
-        <div class="step-row">
-          <div class="step-num">01</div>
-          <div class="step-body">
-            <h3>Create your <em>studio account.</em></h3>
-            <p>Add your logo, studio name and accent colour. Takes a few minutes.</p>
-          </div>
-        </div>
-        <div class="step-row">
-          <div class="step-num">02</div>
-          <div class="step-body">
-            <h3>Upload and <em>tag your library.</em></h3>
-            <p>Your own curated images, tagged by room type and style. No generic stock.</p>
-          </div>
-        </div>
-        <div class="step-row">
-          <div class="step-num">03</div>
-          <div class="step-body">
-            <h3>Generate a <em>client link.</em></h3>
-            <p>A personalised, branded link, scoped to that client's project.</p>
-          </div>
-        </div>
-        <div class="step-row">
-          <div class="step-num">04</div>
-          <div class="step-body">
-            <h3>Your client <em>swipes.</em></h3>
-            <p>A few minutes of instinctive choices. No account needed on their end.</p>
-          </div>
-        </div>
-        <div class="step-row">
-          <div class="step-num">05</div>
-          <div class="step-body">
-            <h3>The report <em>arrives.</em></h3>
-            <p>Dominant styles, rejections and a written narrative, waiting in your dashboard.</p>
-          </div>
-        </div>
-      </div>
+    <div class="tour-embed">
+      <iframe id="studio-tour" src="studio-tour/index.html?theme=dark" title="IMPRINT Studio interactive tour" loading="lazy"></iframe>
     </div>
   </div>
 </section>
@@ -2046,6 +2016,7 @@ footer {
   <div class="footer-links">
     <a href="/connect.html">IMPRINT Connect</a>
     <a href="https://calendly.com/richard-creativise/meeting-with-richard" target="_blank" rel="noopener noreferrer">Book a Demo</a>
+    <a href="#how-it-works">Studio Tour</a>
     <a href="https://pub-7413876ac6f0402f9b10c47f94dd0c5c.r2.dev/IMPRINT%20Quick%20Start%20Guide%20v1.pdf" target="_blank">Quick Start Guide</a>
     <a href="/privacy-policy.html">Privacy Policy</a>
     <a href="/terms.html">Terms of Service</a>
@@ -2951,5 +2922,17 @@ document.getElementById('impOverlay').addEventListener('click', function(e) {
   }
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0bfc408bc63134c',t:'MTc4MTUwNzUzOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0bfc408bc63134c',t:'MTc4MTUwNzUzOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>
+  (function () {
+    const f = document.getElementById('studio-tour');
+    if (!f) return;
+    const sendVH = () => f.contentWindow && f.contentWindow.postMessage({ imprintTourVH: window.innerHeight }, '*');
+    window.addEventListener('message', e => {
+      if (e.source === f.contentWindow && e.data && e.data.imprintTourHeight) f.style.height = e.data.imprintTourHeight + 'px';
+    });
+    f.addEventListener('load', sendVH);
+    window.addEventListener('resize', sendVH);
+  })();
+</script></body>
 </html>
